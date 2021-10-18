@@ -1,0 +1,52 @@
+<html>
+<head>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+	<meta charset='utf-8'>
+	<style>
+		body {font-size:140%;} 
+		#main {display: table; margin: auto;  padding: 0 10px 0 10px; } 
+		h2,{text-align:center; } 
+		.onbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #4CAF50; font-size: 120%;} 
+		.offbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #af4c4c; font-size: 120%;}
+	</style>
+	<title>Pool Control</title>
+</head>
+<body>
+	<div id='main'>
+		<h2>Pool Control</h2>
+		<table>
+			<tr><th>Time:</th> <td>21/10/13 04:21:30</td></tr>
+			<tr><th>Pump:</th> <td>ON</td></tr>
+			<tr><th>Mode:</th> <td>Auto</td></tr>
+			<tr><th>Duty:</th> <td>50%</td></tr>
+		</table>
+		<p><form method='get'>
+			<input type='hidden' value='1' name='BUMP'>
+			<input type='hidden' value='0' name='na'>
+			<input type='submit' value='Bump'>
+		</form></p>
+		<p><form method='get' onsubmit='synctime()'>
+			<div id='time'>
+			</div>
+			<input type='hidden' value='0' name='na'>
+			<input type='submit' value='Sync Time'>
+		</form></p><p>
+			<a href='index'>Main Page</a> - <a href='confg'>Configuration Page</a> - <a href='sched'>Schedual Page</a>
+		</p>
+	</div>
+	<script>
+		function synctime(){
+			let currentDate=new Date();
+			let cDoW=currentDate.getDay();
+			let cDay=currentDate.getDate();
+			let cMonth=currentDate.getMonth()+1;
+			let cYear=currentDate.getYear();
+			let cHour=currentDate.getHours();
+			let cMins=currentDate.getMinutes();
+			let cSec=currentDate.getSeconds();
+			
+			document.getElementById('time').innerHTML='<input type=hidden name=SETDOW value='+cDoW+'><input type=hidden name=SETDATE value='+cDay+'><input type=hidden name=SETMNTH value='+cMonth+'><input type=hidden name=SETYEAR value='+cYear+'><input type=hidden name=SETHR value='+cHour+'><input type=hidden name=SETMIN value='+cMins+'><input type=hidden name=SETSEC value='+cSec+'>';
+		}
+	</script>
+</body>
+</html>

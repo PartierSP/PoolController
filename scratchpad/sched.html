@@ -1,0 +1,80 @@
+<html>
+<head>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+	<meta charset='utf-8'>
+	<style>
+		body {font-size:140%;} 
+		#main {display: table; margin: auto;  padding: 0 10px 0 10px; } 
+		h2,{text-align:center; } 
+		.onbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #4CAF50; font-size: 120%;} 
+		.offbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #af4c4c; font-size: 120%;}
+	</style>
+	<title>Pool Control</title>
+</head>
+<body>
+	<div id='main'>
+		<h2>Pool Control</h2>
+		<table>
+			<tr><th>Time:</th> <td>21/10/13 04:21:30</td></tr>
+			<tr><th>Pump:</th> <td>ON</td></tr>
+			<tr><th>Mode:</th> <td>Auto</td></tr>
+			<tr><th>Duty:</th> <td>50%</td></tr>
+		</table>
+		<p><form method='get'>
+			<table>
+				<tr>
+					<th>Day</th>
+					<th colspan=2>Time</th>
+					<th>Power</th>
+				</tr>
+				<tr>
+					<td rowspan=4><input type="text" value="Weekend" disabled></td>
+					<td><input type="number" name="prog[0][]" min=0 max=23 step=1 value="{$prog[0][0]}"></td>
+					<td><input type="number" name="prog[0][]" min=0 max=55 step=5 value="{$prog[0][1]}"></td>
+					<td><input type="number" name="prog[0][]" min=0 max=4 step=1 value="{$prog[0][2]}"></td>
+				</tr>
+				<tr>
+					<td><input type="number" name="prog[1][]" min=0 max=23 step=1 value="{$prog[1][0]}"></td>
+					<td><input type="number" name="prog[1][]" min=0 max=55 step=5 value="{$prog[1][1]}"></td>
+					<td><input type="number" name="prog[1][]" min=0 max=4 step=1 value="{$prog[1][2]}"></td>
+				</tr>
+				<tr>
+					<td><input type="number" name="prog[2][]" min=0 max=23 step=1 value="{$prog[2][0]}"></td>
+					<td><input type="number" name="prog[2][]" min=0 max=55 step=5 value="{$prog[2][1]}"></td>
+					<td><input type="number" name="prog[2][]" min=0 max=4 step=1 value="{$prog[2][2]}"></td>
+				</tr>
+				<tr>
+					<td><input type="number" name="prog[3][]" min=0 max=23 step=1 value="{$prog[3][0]}"></td>
+					<td><input type="number" name="prog[3][]" min=0 max=55 step=5 value="{$prog[3][1]}"></td>
+					<td><input type="number" name="prog[3][]" min=0 max=4 step=1 value="{$prog[3][2]}"></td>
+				</tr>
+				<tr>
+					<td rowspan=4><input type="text" value="Weekday" disabled></td>
+					<td><input type="number" name="prog[4][]" min=0 max=23 step=1 value="{$prog[4][0]}"></td>
+					<td><input type="number" name="prog[4][]" min=0 max=55 step=5 value="{$prog[4][1]}"></td>
+					<td><input type="number" name="prog[4][]" min=0 max=4 step=1 value="{$prog[4][2]}"></td>
+				</tr>
+				<tr>
+					<td><input type="number" name="prog[5][]" min=0 max=23 step=1 value="{$prog[5][0]}"></td>
+					<td><input type="number" name="prog[5][]" min=0 max=55 step=5 value="{$prog[5][1]}"></td>
+					<td><input type="number" name="prog[5][]" min=0 max=4 step=1 value="{$prog[5][2]}"></td>
+				</tr>
+				<tr>
+					<td><input type="number" name="prog[6][]" min=0 max=23 step=1 value="{$prog[6][0]}"></td>
+					<td><input type="number" name="prog[6][]" min=0 max=55 step=5 value="{$prog[6][1]}"></td>
+					<td><input type="number" name="prog[6][]" min=0 max=4 step=1 value="{$prog[6][2]}"></td>
+				</tr>
+				<tr>
+					<td><input type="number" name="prog[7][]" min=0 max=23 step=1 value="{$prog[7][0]}"></td>
+					<td><input type="number" name="prog[7][]" min=0 max=55 step=5 value="{$prog[7][1]}"></td>
+					<td><input type="number" name="prog[7][]" min=0 max=4 step=1 value="{$prog[7][2]}"></td>
+				</tr>
+			</table>
+			<input type='hidden' value='0' name='na'>
+			<input type='submit' value='Sync Time'>
+		</form></p><p>
+			<a href='index'>Main Page</a> - <a href='confg'>Configuration Page</a> - <a href='sched'>Schedual Page</a>
+		</p>
+	</div>
+</body>
+</html>
