@@ -14,6 +14,10 @@ DS3231 Clock;
 bool century = false;
 bool h12Flag;
 bool pmFlag;
+byte Hour;
+byte Minute;
+byte mode;
+byte line;
 
 String header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 String html_1 = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'/><meta charset='utf-8'><style>body {font-size:140%;} #main {display: table; margin: auto;  padding: 0 10px 0 10px; } h2,{text-align:center; } .onbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #4CAF50; font-size: 120%;} .offbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #af4c4c; font-size: 120%;}</style><title>Pool Control</title></head><body><div id='main'><h2>Pool Control</h2>";
@@ -32,11 +36,12 @@ String request = "";
 String DoW[7]={"Sun", "Mon", "Tue", "Wed", "Thr", "Fri", "Sat"};
 int Max[3]={23, 55, 4};
 int Step[3]={1,5,1};
+int ModeDesc[5]={0,25,50,75,100};
 
 int Pool_Pin = D3;
 
-int Program[8][3]; //program schedule.  Rows 0~3=Weekdays, Rows 4~7=Weekends
-                   //                   Col 0=Powerlevel, Col 1=Hour & Col2=Mins for start time.
+byte Program[8][3]; //program schedule.  Rows 0~3=Weekdays, Rows 4~7=Weekends
+                   //                   Col 2=Powerlevel, Col 0=Hour & Col1=Mins for start time.
 
                    //Schedule: Rows 0~4 Requested power level (0=off, 1=25%, 2=50%, 3=75%, 4=100%)
                    //          Columns 0~59 Pump status for that minuite
@@ -82,7 +87,17 @@ void loop() {
   int col;
   int row;
   
-  // put your main code here, to run repeatedly:
+  CheckOutput();
+  Minute=Clock.getMinute();
+  i=Schedule[mode][Minute];
+  if(i==digitalRead(Pool_Pin)){
+    Serial.print("Running Mode: ");
+    Serial.println(mode);
+  }
+  digitalWrite(Pool_Pin, !i);
+
+  delay(50);
+
   WiFiClient client = server.available();
   if (!client) {
     return;
@@ -261,8 +276,7 @@ void loop() {
   }
 
   Serial.println("");
-  
-  delay(5);
+
 }
 
 void updatestatus(){
@@ -279,6 +293,10 @@ void updatestatus(){
   }else{
     html_status.concat("Off");
   }
+  html_status.concat("</td></tr><tr><th>Power: </th><td>");
+  html_status.concat(ModeDesc[mode]);
+  html_status.concat("%</td></tr><tr><th>Prg Line: </th><td>");
+  html_status.concat(line);
   html_status.concat("</td></tr></table>");
   
   
@@ -316,4 +334,25 @@ String convertToString(char* a, int size)
     s = s + a[i];
   }
   return s;
+}
+
+void CheckOutput(){
+  int product;
+  int i;
+
+  //FIXME: Currently only checks Weekend schedual.  Must check DoW to select proper schedual row.
+  
+  Hour=Clock.getHour(h12Flag, pmFlag);
+  Minute=Clock.getMinute();
+
+  product=(Hour*100)+Minute;
+
+  mode=Program[3][2];
+  line=3;
+  for(i=0;i<4;i++){
+    if((Program[i][0]*100)+Program[i][1]<=product){
+      mode=Program[i][2];
+      line=i;
+    }
+  }
 }
