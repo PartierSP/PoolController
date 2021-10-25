@@ -24,7 +24,7 @@ String html_1 = "<!DOCTYPE html><html><head><meta name='viewport' content='width
 String html_2 = "<form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value='Bump'></form></p><p><form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time'></form></p><p><script>function synctime(){let currentDate=new Date();let cDoW=currentDate.getDay();let cDay=currentDate.getDate();let cMonth=currentDate.getMonth()+1;let cYear=currentDate.getYear()-100;let cHour=currentDate.getHours();let cMins=currentDate.getMinutes();let cSec=currentDate.getSeconds();document.getElementById('time').innerHTML='<input type=hidden name=SETDOW value='+cDoW+'><input type=hidden name=SETDATE value='+cDay+'><input type=hidden name=SETMNTH value='+cMonth+'><input type=hidden name=SETYEAR value='+cYear+'><input type=hidden name=SETHR value='+cHour+'><input type=hidden name=SETMIN value='+cMins+'><input type=hidden name=SETSEC value='+cSec+'>';}</script>";
 String html_3 = "";
 String html_4 = "<p><a href='index'>Main Page</a> - <a href='confg'>Configuration Page</a> - <a href='sched'>Schedual Page</a></p></body></html>";
-String html_5 = "<form method='get'><table><tr><th>Day</th><th colspan=2>Time</th><th>Power</th></tr>";
+String html_5 = "<form method='get'><table border=1 cellpadding=0 cellspacing=0><tr><th>Day</th><th>Line</th><th colspan=2>Time</th><th>Power</th></tr>";
 String html_6 = "<td rowspan=4><input type=text value=Weekend disabled></td>";
 String html_7 = "<td rowspan=4><input type=text value=Weekday disabled></td>";
 String html_8 = "</table><input type=hidden value=0 name=na><input type=submit value='Update Schedule'></form>";
@@ -38,7 +38,7 @@ int Max[3]={23, 55, 4};
 int Step[3]={1,5,1};
 int ModeDesc[5]={0,25,50,75,100};
 
-int Pool_Pin = D3;
+int Pool_Pin = D4;
 
 byte Program[8][3]; //program schedule.  Rows 0~3=Weekdays, Rows 4~7=Weekends
                    //                   Col 2=Powerlevel, Col 0=Hour & Col1=Mins for start time.
@@ -59,6 +59,13 @@ void setup() {
   digitalWrite(Pool_Pin, 1);
 
   Wire.begin();
+
+  EEPROM.begin(32);
+  for(int i=0;i<8;i++){
+    for(int x=0;x<4;x++){
+      Program[i][x]=EEPROM.read(i*4+x);
+    }
+  }
 
   Serial.print("Connecting to ");
   Serial.print(ssid);
@@ -157,6 +164,9 @@ void loop() {
           Serial.print("Setting day of the week to: ");
           Serial.println(value);
           i=atoi(value);
+          if (i==0){
+            i=7; //Javascript sets Sunday to 0, DS3231 doesn't like that.
+          }
           Clock.setDoW(i);
         } else if(strcmp("SETYEAR",desc)==0){
           Serial.print("Setting year to: ");
@@ -219,6 +229,7 @@ void loop() {
           row=(int)desc[6]-48;
           col=(int)desc[11]-48;
           Program[row][col]=atoi(value);
+          EEPROM.put(row*4+col,Program[row][col]);
           Serial.print("Row: ");
           Serial.print(row);
           Serial.print(" Col: ");
@@ -232,6 +243,7 @@ void loop() {
       }
       idx++;
     }
+    EEPROM.commit();
     updatestatus();
     client.flush();
     client.print(header);
@@ -246,6 +258,9 @@ void loop() {
       }else if(i==4){
         client.print(html_7);
       }
+      client.print("<td><input type=text value=");
+      client.print(i);
+      client.print(" disabled></td>");
       for(int x=0;x<3;x++){
         client.print("<td><input type=number name=prog[");
         client.print(i);
@@ -339,17 +354,24 @@ String convertToString(char* a, int size)
 void CheckOutput(){
   int product;
   int i;
+  int DoW;
+  int x;
 
-  //FIXME: Currently only checks Weekend schedual.  Must check DoW to select proper schedual row.
-  
   Hour=Clock.getHour(h12Flag, pmFlag);
   Minute=Clock.getMinute();
+  DoW=Clock.getDoW();
+
+  if (DoW<6){
+    x=4; //Weekday.  Skip Weekend schedual lines.
+  }else{
+    x=0; //Weekend.  Done skip past Weekend schedual lines.
+  }
 
   product=(Hour*100)+Minute;
 
-  mode=Program[3][2];
+  mode=Program[3+x][2];
   line=3;
-  for(i=0;i<4;i++){
+  for(i=0+x;i<4+x;i++){
     if((Program[i][0]*100)+Program[i][1]<=product){
       mode=Program[i][2];
       line=i;
