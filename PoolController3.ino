@@ -18,10 +18,12 @@ byte Hour;
 byte Minute;
 byte mode;
 byte line;
+bool ManOveride;
+byte ManOvOff;
 
 String header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 String html_1 = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'/><meta charset='utf-8'><style>body {font-size:140%;} #main {display: table; margin: auto;  padding: 0 10px 0 10px; } h2,{text-align:center; } .onbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #4CAF50; font-size: 120%;} .offbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #af4c4c; font-size: 120%;}</style><title>Pool Control</title></head><body><div id='main'><h2>Pool Control</h2>";
-String html_2 = "<form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value='Bump'></form></p><p><form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time'></form></p><p><script>function synctime(){let currentDate=new Date();let cDoW=currentDate.getDay();let cDay=currentDate.getDate();let cMonth=currentDate.getMonth()+1;let cYear=currentDate.getYear()-100;let cHour=currentDate.getHours();let cMins=currentDate.getMinutes();let cSec=currentDate.getSeconds();document.getElementById('time').innerHTML='<input type=hidden name=SETDOW value='+cDoW+'><input type=hidden name=SETDATE value='+cDay+'><input type=hidden name=SETMNTH value='+cMonth+'><input type=hidden name=SETYEAR value='+cYear+'><input type=hidden name=SETHR value='+cHour+'><input type=hidden name=SETMIN value='+cMins+'><input type=hidden name=SETSEC value='+cSec+'>';}</script>";
+String html_2 = "<form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Manual Overide'></form></p><p><form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value='Bump'></form></p><p><form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time'></form></p><p><script>function synctime(){let currentDate=new Date();let cDoW=currentDate.getDay();let cDay=currentDate.getDate();let cMonth=currentDate.getMonth()+1;let cYear=currentDate.getYear()-100;let cHour=currentDate.getHours();let cMins=currentDate.getMinutes();let cSec=currentDate.getSeconds();document.getElementById('time').innerHTML='<input type=hidden name=SETDOW value='+cDoW+'><input type=hidden name=SETDATE value='+cDay+'><input type=hidden name=SETMNTH value='+cMonth+'><input type=hidden name=SETYEAR value='+cYear+'><input type=hidden name=SETHR value='+cHour+'><input type=hidden name=SETMIN value='+cMins+'><input type=hidden name=SETSEC value='+cSec+'>';}</script>";
 String html_3 = "";
 String html_4 = "<p><a href='index'>Main Page</a> - <a href='confg'>Configuration Page</a> - <a href='sched'>Schedual Page</a></p></body></html>";
 String html_5 = "<form method='get'><table border=1 cellpadding=0 cellspacing=0><tr><th>Day</th><th>Line</th><th colspan=2>Time</th><th>Power</th></tr>";
@@ -67,6 +69,8 @@ void setup() {
     }
   }
 
+  ManOveride=false;
+
   Serial.print("Connecting to ");
   Serial.print(ssid);
   WiFi.begin(ssid,pass);
@@ -97,11 +101,20 @@ void loop() {
   CheckOutput();
   Minute=Clock.getMinute();
   i=Schedule[mode][Minute];
-  if(i==digitalRead(Pool_Pin)){
-    Serial.print("Running Mode: ");
-    Serial.println(mode);
+//  if(i==digitalRead(Pool_Pin)){
+//    Serial.print("Running Mode: ");
+//    Serial.println(mode);
+//  }
+  if(ManOveride==true){
+    if(Minute==ManOvOff){
+      digitalWrite(Pool_Pin, true);
+      ManOveride=false;
+    }else{
+      digitalWrite(Pool_Pin,false);
+    }
+  }else{
+    digitalWrite(Pool_Pin, !i);
   }
-  digitalWrite(Pool_Pin, !i);
 
   delay(50);
 
@@ -185,6 +198,14 @@ void loop() {
             Serial.println(i);
             digitalWrite(Pool_Pin,i);
           }
+        } else if(strcmp("MANOVRD",desc)==0){
+          Serial.println("Starting Manual Overide");
+          if(Minute>0){
+            ManOvOff=Minute-1;
+          }else{
+            ManOvOff=59;
+          }
+          ManOveride=true;
         }
         desc[0]='\0';
         value[0]='\0';
@@ -196,6 +217,15 @@ void loop() {
     client.print(header);
     client.print(html_1);
     client.print(html_status);
+    if(ManOveride==true){
+      client.print("<p>Manual Overide is on. ");
+      i=ManOvOff-Minute;
+      if(i<0){
+        i=i+60;
+      }
+      client.print(i);
+      client.print(" minutes left.</p>");
+    }
     client.print(html_2);
 //    client.print(html_3);  // Send debug info to client.
     client.print(html_4);
