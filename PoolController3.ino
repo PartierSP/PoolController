@@ -6,8 +6,8 @@
 //const char WiFiPassword[] = "12345678";
 //const char AP_NameChar[] = "LEDControl";
 
-char ssid[]="SmartRG-85ea";
-char pass[]="8d549a5c26";
+char ssid[]="yournetworkssid";
+char pass[]="yournetworkpassword";
 
 WiFiServer server(80);
 DS3231 Clock;
