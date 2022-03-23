@@ -1,28 +1,37 @@
 <html>
 <head>
-	<meta name='viewport' content='width=device-width, initial-scale=1.0'/>
 	<meta charset='utf-8'>
-	<style>
-		body {font-size:140%;} 
-		#main {display: table; margin: auto;  padding: 0 10px 0 10px; } 
-		h2,{text-align:center; } 
-		.onbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #4CAF50; font-size: 120%;} 
-		.offbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #af4c4c; font-size: 120%;}
-	</style>
+	<link rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css'> 
 	<title>Pool Control</title>
 </head>
-<body>
-	<div id='main'>
-		<h2>Pool Control</h2>
-		<list>
-			<ul>Time: 21/10/13 04:21:30</ul>
-			<ul>Pump: ON</ul>
-			<ul>Mode: Auto</ul>
-			<ul>Duty: 50%</ul>
-		</list>
-		<p>
-			<a href='index'>Main Page</a> - <a href='confg'>Configuration Page</a> - <a href='sched'>Schedual Page</a>
-		</p>
+<body class='w3-pale-blue'>
+	<div class='w3-main'>
+		<div class='w3-blue'>
+			<div class='w3-container'>
+				<h1>Pool Control</h1>
+			</div>
+		</div>
+		<div class='w3-container'>
+			<div class='w3-auto'>
+				<h3>Status</h3>
+				<table class='w3-table w3-bordered w3-card-4 w3-white'>
+					<tr>
+						<th>Time:</th><td>21/10/13 04:21:30</td>
+					</tr><tr>
+						<th>Pump:</th><td class='w3-text-green'><b>ON</b></td>
+					</tr><tr>
+						<th>Mode:</th><td class='w3-text-green'><b>Auto</b></td>
+					</tr><tr>
+						<th>Duty:</th><td><div class='w3-container w3-center w3-green'style='width:50%'>50%</div></td>
+					</tr>
+				</table>
+				<div class='w3-panel w3-card-4 w3-white'>
+					<div class='w3-container w3-center w3-padding'>
+						<a href='index' class='w3-button w3-blue'>Main Page</a> - <a href='confg' class='w3-button w3-blue'>Configuration Page</a> - <a href='sched' class='w3-button w3-blue'>Schedual Page</a>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

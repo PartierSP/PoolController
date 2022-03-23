@@ -2,12 +2,21 @@
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <Wire.h>
+#include "config.h"
+
+//The config.h file is used to configure the network SSID and password.  It should
+//contain the following two lines (subsituting your SSID name and password for
+//myssid mypassword).  Quotes must be included.
+//
+//  #define SSID_NAME "myssid"
+//  #define NET_PASSWD "mypassword"
+//
 
 //const char WiFiPassword[] = "12345678";
 //const char AP_NameChar[] = "LEDControl";
 
-char ssid[]="yournetworkssid";
-char pass[]="yournetworkpassword";
+char ssid[]=SSID_NAME;
+char pass[]=NET_PASSWD;
 
 WiFiServer server(80);
 DS3231 Clock;
