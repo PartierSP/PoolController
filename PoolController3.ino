@@ -31,10 +31,65 @@ bool ManOveride;
 byte ManOvOff;
 
 String header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-String html_1 = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'/><meta charset='utf-8'><style>body {font-size:140%;} #main {display: table; margin: auto;  padding: 0 10px 0 10px; } h2,{text-align:center; } .onbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #4CAF50; font-size: 120%;} .offbutton { padding:10px 10px 10px 10px; width:100%;  background-color: #af4c4c; font-size: 120%;}</style><title>Pool Control</title></head><body><div id='main'><h2>Pool Control</h2>";
-String html_2 = "<form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Manual Overide'></form></p><p><form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value='Bump'></form></p><p><form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time'></form></p><p><script>function synctime(){let currentDate=new Date();let cDoW=currentDate.getDay();let cDay=currentDate.getDate();let cMonth=currentDate.getMonth()+1;let cYear=currentDate.getYear()-100;let cHour=currentDate.getHours();let cMins=currentDate.getMinutes();let cSec=currentDate.getSeconds();document.getElementById('time').innerHTML='<input type=hidden name=SETDOW value='+cDoW+'><input type=hidden name=SETDATE value='+cDay+'><input type=hidden name=SETMNTH value='+cMonth+'><input type=hidden name=SETYEAR value='+cYear+'><input type=hidden name=SETHR value='+cHour+'><input type=hidden name=SETMIN value='+cMins+'><input type=hidden name=SETSEC value='+cSec+'>';}</script>";
+String html_1 = R"====(<!DOCTYPE html><html>
+<head>
+  <meta charset='utf-8'>
+  <link rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css'> 
+  <title>Pool Control</title>
+</head>
+<body class='w3-pale-blue'>
+  <div class='w3-main'>
+    <div class='w3-blue'>
+      <div class='w3-container'>
+        <h1>Pool Control</h1>
+      </div>
+    </div>
+    <div class='w3-container'>
+      <div class='w3-auto'>
+        <h3>Status</h3>
+)====";
+String html_2 = R"====(
+    <div class='w3-panel w3-card-4 w3-white w3-round-large'>
+      <div class='w3-contatiner w3-center w3-padding'>
+        <form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Manual Overide' class='w3-button w3-blue w3-round-large'></form> - <form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value='Bump' class='w3-button w3-blue w3-round-large'></form> - <form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time' class='w3-button w3-blue w3-round-large'></form>
+        <script>
+          function synctime(){
+            let currentDate=new Date();
+            let cDoW=currentDate.getDay();
+            let cDay=currentDate.getDate();
+            let cMonth=currentDate.getMonth()+1;
+            let cYear=currentDate.getYear()-100;
+            let cHour=currentDate.getHours();
+            let cMins=currentDate.getMinutes();
+            let cSec=currentDate.getSeconds();
+            
+            document.getElementById('time').innerHTML='
+              <input type=hidden name=SETDOW value='+cDoW+'>
+              <input type=hidden name=SETDATE value='+cDay+'>
+              <input type=hidden name=SETMNTH value='+cMonth+'>
+              <input type=hidden name=SETYEAR value='+cYear+'>
+              <input type=hidden name=SETHR value='+cHour+'>
+              <input type=hidden name=SETMIN value='+cMins+'>
+              <input type=hidden name=SETSEC value='+cSec+'>
+            ';
+          }
+        </script>
+      </div>
+    </div>
+)====";
 String html_3 = "";
-String html_4 = "<p><a href='index'>Main Page</a> - <a href='confg'>Configuration Page</a> - <a href='sched'>Schedual Page</a></p></body></html>";
+String html_4 = R"====(
+       <div class='w3-panel w3-card-4 w3-white w3-round-large'>
+          <div class='w3-container w3-center w3-padding'>
+            <a href='index' class='w3-button w3-blue w3-round-large'>Main Page</a> - <a href='confg' class='w3-button w3-blue w3-round-large'>Configuration Page</a> - <a href='sched' class='w3-button w3-blue w3-round-large'>Schedual Page</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+)====";
 String html_5 = "<form method='get'><table border=1 cellpadding=0 cellspacing=0><tr><th>Day</th><th>Line</th><th colspan=2>Time</th><th>Power</th></tr>";
 String html_6 = "<td rowspan=4><input type=text value=Weekend disabled></td>";
 String html_7 = "<td rowspan=4><input type=text value=Weekday disabled></td>";
@@ -226,17 +281,7 @@ void loop() {
     client.print(header);
     client.print(html_1);
     client.print(html_status);
-    if(ManOveride==true){
-      client.print("<p>Manual Overide is on. ");
-      i=ManOvOff-Minute;
-      if(i<0){
-        i=i+60;
-      }
-      client.print(i);
-      client.print(" minutes left.</p>");
-    }
     client.print(html_2);
-//    client.print(html_3);  // Send debug info to client.
     client.print(html_4);
     html_3="";
 
@@ -335,21 +380,40 @@ void loop() {
 
 void updatestatus(){
   int i;
+  int x;
   
   getdatetime();
   i=digitalRead(Pool_Pin);
 
-  html_status="<table><tr><th>Time:</th><td>";
+  html_status="<table class='w3-table w3-bordered w3-card-4 w3-white w3-round-large'><tr><th style='width:25%'>Time:</th><td>";
   html_status.concat(curdatetime);
-  html_status.concat("</td></tr><tr><th>Pump:</th><td>");
+  html_status.concat("</td></tr><tr><th>Pump:</th><td class='w3-text-");
   if(i==0){
-    html_status.concat("On");
+    html_status.concat("green'><b>On");
   }else{
-    html_status.concat("Off");
+    html_status.concat("red'><b>Off");
   }
-  html_status.concat("</td></tr><tr><th>Power: </th><td>");
-  html_status.concat(ModeDesc[mode]);
-  html_status.concat("%</td></tr><tr><th>Prg Line: </th><td>");
+  html_status.concat("</b></td></tr><tr><th>Mode:</th><td>");
+  if(ManOveride==true){
+    html_status.concat("Manual Overide</td></tr><tr><th>Remaining:</th><td><div class='w3-container w3-center w3-green' style='width:");
+    i=ManOvOff-Minute;
+    if(i<0){
+      i=i+60;
+    }
+    x=i*5/3;
+    html_status.concat(x);
+    html_status.concat("%'>");
+    html_status.concat(i);
+    html_status.concat("mins</div></td></tr>");
+  }else{
+    html_status.concat("Automatic</td></tr>");
+    html_status.concat("<tr><th>Power: </th><td><div class='w3-container w3-center w3-green' style='width:");
+    html_status.concat(ModeDesc[mode]);
+    html_status.concat("%'>");
+    html_status.concat(ModeDesc[mode]);
+    html_status.concat("%</div></td></tr>");
+  }
+  html_status.concat("<tr><th>Prg Line: </th><td>");
   html_status.concat(line);
   html_status.concat("</td></tr></table>");
   
