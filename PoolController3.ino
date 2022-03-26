@@ -390,7 +390,7 @@ void updatestatus(){
   getdatetime();
   i=digitalRead(Pool_Pin);
 
-  html_status="<table class='w3-table w3-bordered w3-card-4 w3-white w3-round-large'><tr><th style='width:25%'>Time:</th><td>";
+  html_status="<div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'><table class='w3-table w3-bordered'><tr><th style='width:25%'>Time:</th><td>";
   html_status.concat(curdatetime);
   html_status.concat("</td></tr><tr><th>Pump:</th><td class='w3-text-");
   if(i==0){
@@ -420,7 +420,7 @@ void updatestatus(){
   }
   html_status.concat("<tr><th>Prg Line: </th><td>");
   html_status.concat(line);
-  html_status.concat("</td></tr></table>");
+  html_status.concat("</td></tr></table><br></div>");
   
   
 }
