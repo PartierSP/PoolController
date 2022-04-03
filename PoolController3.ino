@@ -102,7 +102,7 @@ String html_status = "";
 String curdatetime = "";
 String request = "";
 
-String DoW[7]={"Sun", "Mon", "Tue", "Wed", "Thr", "Fri", "Sat"};
+String sDoW[8]={"Sun", "Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"};
 int Max[3]={23, 55, 4};
 int Step[3]={1,5,1};
 int ModeDesc[5]={0,25,50,75,100};
@@ -429,7 +429,17 @@ void updatestatus(){
   }
   html_status.concat("<tr><th>Prg Line: </th><td>");
   html_status.concat(line);
-  html_status.concat("</td></tr><tr><th>Signal Strength</th><td><div class='w3-container w3-center w3-green' style='width:");
+  html_status.concat("</td></tr><tr><th>Signal Strength</th><td><div class='w3-container w3-center w3-");
+  if (sgnl>30){
+    html_status.concat("green");
+  }else{
+    if(sgnl<20){
+      html_status.concat("red");
+    }else{
+      html_status.concat("orange");
+    }
+  }
+  html_status.concat("' style='width:");
   html_status.concat(sgnl);
   html_status.concat("%'>");
   html_status.concat(sgnl);
@@ -440,7 +450,7 @@ void updatestatus(){
 
 void getdatetime(){
   curdatetime="";
-  curdatetime.concat(DoW[Clock.getDoW()]);
+  curdatetime.concat(sDoW[Clock.getDoW()]);
   curdatetime.concat(" ");
   curdatetime.concat(Clock.getYear());
   curdatetime.concat("/");
