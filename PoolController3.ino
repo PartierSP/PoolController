@@ -143,6 +143,9 @@ void setup() {
   WiFi.begin(ssid,pass);
   while(WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
+    digitalWrite(Pool_Pin, 0);
+    delay(5);
+    digitalWrite(Pool_Pin, 1);
     delay(500);
   }
   Serial.println("");
@@ -237,7 +240,7 @@ void loop() {
           Clock.setMonth(i);
         } else if(strcmp("SETDATE",desc)==0){
           Serial.print("Setting day of the month to: ");
-          Serial.print(value);
+          Serial.println(value);
           i=atoi(value);
           Clock.setDate(i);
         } else if(strcmp("SETDOW",desc)==0){
