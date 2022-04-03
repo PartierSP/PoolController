@@ -15,6 +15,9 @@
 //const char WiFiPassword[] = "12345678";
 //const char AP_NameChar[] = "LEDControl";
 
+const int MAX_VAL = -20; // define maximum WiFi signal strength (in dBm)
+const int MIN_VAL = -90; // define minimum WiFi signal strength (in dBm)
+
 char ssid[]=SSID_NAME;
 char pass[]=NET_PASSWD;
 
@@ -386,9 +389,13 @@ void loop() {
 void updatestatus(){
   int i;
   int x;
+  long rssi;
+  int sgnl;
   
   getdatetime();
   i=digitalRead(Pool_Pin);
+  rssi = WiFi.RSSI();
+  sgnl=map(rssi, MIN_VAL, MAX_VAL, 0, 100); 
 
   html_status="<div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'><table class='w3-table w3-bordered'><tr><th style='width:25%'>Time:</th><td>";
   html_status.concat(curdatetime);
@@ -420,7 +427,11 @@ void updatestatus(){
   }
   html_status.concat("<tr><th>Prg Line: </th><td>");
   html_status.concat(line);
-  html_status.concat("</td></tr></table><br></div>");
+  html_status.concat("</td></tr><tr><th>Signal Strength</th><td><div class='w3-container w3-center w3-green' style='width:");
+  html_status.concat(sgnl);
+  html_status.concat("%'>");
+  html_status.concat(sgnl);
+  html_status.concat("%</div></td></tr></table><br></div>");
   
   
 }
