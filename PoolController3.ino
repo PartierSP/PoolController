@@ -66,15 +66,14 @@ String html_2 = R"====(
             let cMins=currentDate.getMinutes();
             let cSec=currentDate.getSeconds();
             
-            document.getElementById('time').innerHTML='
-              <input type=hidden name=SETDOW value='+cDoW+'>
-              <input type=hidden name=SETDATE value='+cDay+'>
-              <input type=hidden name=SETMNTH value='+cMonth+'>
-              <input type=hidden name=SETYEAR value='+cYear+'>
-              <input type=hidden name=SETHR value='+cHour+'>
-              <input type=hidden name=SETMIN value='+cMins+'>
-              <input type=hidden name=SETSEC value='+cSec+'>
-            ';
+            document.getElementById('time').innerHTML='<input type=hidden name=SETDOW value='
+              +cDoW+'><input type=hidden name=SETDATE value='
+              +cDay+'><input type=hidden name=SETMNTH value='
+              +cMonth+'><input type=hidden name=SETYEAR value='
+              +cYear+'><input type=hidden name=SETHR value='
+              +cHour+'><input type=hidden name=SETMIN value='
+              +cMins+'><input type=hidden name=SETSEC value='
+              +cSec+'>';
           }
         </script>
       </div>
