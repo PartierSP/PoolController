@@ -28,6 +28,9 @@ byte mode;
 byte line;
 bool ManOveride;
 byte ManOvOff;
+byte function = 0;  // Which is running. 0 - Automatic or TempManOveride
+                    //                   1 - Force on
+                    //                   2 - Force off
 
 String html_status = "";
 String curdatetime = "";
@@ -89,15 +92,25 @@ void loop() {
 //    Serial.print("Running Mode: ");
 //    Serial.println(mode);
 //  }
-  if(ManOveride==true){
-    if(Minute==ManOvOff){
-      digitalWrite(Pool_Pin, true);
-      ManOveride=false;
-    }else{
-      digitalWrite(Pool_Pin,false);
-    }
-  }else{
-    digitalWrite(Pool_Pin, !i);
+  switch(function){
+    case 0:
+      if(ManOveride==true){
+        if(Minute==ManOvOff){
+          digitalWrite(Pool_Pin, true);
+          ManOveride=false;
+        }else{
+          digitalWrite(Pool_Pin,false);
+        }
+      }else{
+        digitalWrite(Pool_Pin, !i);
+      }
+      break;
+    case 1:
+      digitalWrite(Pool_Pin, 0);
+      break;
+    case 2:
+      digitalWrite(Pool_Pin, 1);
+      break;
   }
 
   delay(50);
@@ -190,6 +203,19 @@ void loop() {
             ManOvOff=59;
           }
           ManOveride=true;
+          function=0;
+        } else if(strcmp("MANON",desc)==0){
+          Serial.println("Manual ON");
+          function=1;
+          ManOveride=false;
+        } else if(strcmp("MANOFF",desc)==0){
+          Serial.println("Manual OFF");
+          function=2;
+          ManOveride=false;
+        } else if(strcmp("AUTOON",desc)==0){
+          Serial.println("Automatic Mode");
+          function=0;
+          ManOveride=false;
         }
         desc[0]='\0';
         value[0]='\0';
@@ -322,24 +348,34 @@ void updatestatus(){
     html_status.concat("red'><b>Off");
   }
   html_status.concat("</b></td></tr><tr><th>Mode:</th><td>");
-  if(ManOveride==true){
-    html_status.concat("Manual Overide</td></tr><tr><th>Remaining:</th><td><div class='w3-container w3-center w3-green' style='width:");
-    i=ManOvOff-Minute;
-    if(i<0){
-      i=i+60;
-    }
-    x=i*5/3;
-    html_status.concat(x);
-    html_status.concat("%'>");
-    html_status.concat(i);
-    html_status.concat("mins</div></td></tr>");
-  }else{
-    html_status.concat("Automatic</td></tr>");
-    html_status.concat("<tr><th>Power: </th><td><div class='w3-container w3-center w3-green' style='width:");
-    html_status.concat(ModeDesc[mode]);
-    html_status.concat("%'>");
-    html_status.concat(ModeDesc[mode]);
-    html_status.concat("%</div></td></tr>");
+  switch(function){
+    case 0:
+      if(ManOveride==true){
+        html_status.concat("Temporary ON</td></tr><tr><th>Remaining:</th><td><div class='w3-container w3-center w3-green' style='width:");
+        i=ManOvOff-Minute;
+        if(i<0){
+          i=i+60;
+        }
+        x=i*5/3;
+        html_status.concat(x);
+        html_status.concat("%'>");
+        html_status.concat(i);
+        html_status.concat("mins</div></td></tr>");
+      }else{
+        html_status.concat("Automatic</td></tr>");
+        html_status.concat("<tr><th>Power: </th><td><div class='w3-container w3-center w3-green' style='width:");
+        html_status.concat(ModeDesc[mode]);
+        html_status.concat("%'>");
+        html_status.concat(ModeDesc[mode]);
+        html_status.concat("%</div></td></tr>");
+      }
+      break;
+    case 1:
+      html_status.concat("Manual On</td></tr>");
+      break;
+    case 2:
+      html_status.concat("Manual Off");
+      break;
   }
   html_status.concat("<tr><th>Prg Line: </th><td>");
   html_status.concat(line);

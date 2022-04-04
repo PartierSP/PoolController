@@ -19,7 +19,12 @@ String html_1 = R"====(<!DOCTYPE html><html>
 String html_2 = R"====(
     <div class='w3-panel w3-card-4 w3-white w3-round-large'>
       <div class='w3-contatiner w3-center w3-padding'>
-        <form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Manual Overide' class='w3-button w3-blue w3-round-large'></form> - <form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value='Bump' class='w3-button w3-blue w3-round-large'></form> - <form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time' class='w3-button w3-blue w3-round-large'></form>
+        <form method='get'><input type='hidden' value='1' name='AUTOON'><input type='hidden' value='0' name='na'><input type='submit' value='Automatic' class='w3-button w3-green w3-round-large'></form> - 
+        <form method='get'><input type='hidden' value='1' name='MANON'><input type='hidden' value='0' name='na'><input type='submit' value='Manual ON' class='w3-button w3-green w3-round-large'></form> - 
+        <form method='get'><input type='hidden' value='1' name='MANOFF'><input type='hidden' value='0' name='na'><input type='submit' value='Manual OFF' class='w3-button w3-red w3-round-large'></form> - 
+        <form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Temp. ON' class='w3-button w3-yellow w3-round-large'></form> - 
+        <form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value=' Bump ' class='w3-button w3-blue w3-round-large'></form> - 
+        <form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time' class='w3-button w3-blue w3-round-large'></form>
         <script>
           function synctime(){
             let currentDate=new Date();
