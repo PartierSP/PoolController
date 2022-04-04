@@ -17,43 +17,70 @@ String html_1 = R"====(<!DOCTYPE html><html>
         <h3>Status</h3>
 )====";
 String html_2 = R"====(
-    <div class='w3-panel w3-card-4 w3-white w3-round-large'>
-      <div class='w3-contatiner w3-center w3-padding'>
-        <form method='get'><input type='hidden' value='1' name='AUTOON'><input type='hidden' value='0' name='na'><input type='submit' value='Automatic' class='w3-button w3-green w3-round-large'></form> - 
-        <form method='get'><input type='hidden' value='1' name='MANON'><input type='hidden' value='0' name='na'><input type='submit' value='Manual ON' class='w3-button w3-green w3-round-large'></form> - 
-        <form method='get'><input type='hidden' value='1' name='MANOFF'><input type='hidden' value='0' name='na'><input type='submit' value='Manual OFF' class='w3-button w3-red w3-round-large'></form> - 
-        <form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Temp. ON' class='w3-button w3-yellow w3-round-large'></form> - 
-        <form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value=' Bump ' class='w3-button w3-blue w3-round-large'></form> - 
-        <form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time' class='w3-button w3-blue w3-round-large'></form>
-        <script>
-          function synctime(){
-            let currentDate=new Date();
-            let cDoW=currentDate.getDay();
-            let cDay=currentDate.getDate();
-            let cMonth=currentDate.getMonth()+1;
-            let cYear=currentDate.getYear()-100;
-            let cHour=currentDate.getHours();
-            let cMins=currentDate.getMinutes();
-            let cSec=currentDate.getSeconds();
-            
-            document.getElementById('time').innerHTML='<input type=hidden name=SETDOW value='
-              +cDoW+'><input type=hidden name=SETDATE value='
-              +cDay+'><input type=hidden name=SETMNTH value='
-              +cMonth+'><input type=hidden name=SETYEAR value='
-              +cYear+'><input type=hidden name=SETHR value='
-              +cHour+'><input type=hidden name=SETMIN value='
-              +cMins+'><input type=hidden name=SETSEC value='
-              +cSec+'>';
-          }
-        </script>
+    <h3>Mode</h3>
+    <div class='w3-panel w3-card-4 w3-white w3-round-large w3-center'>
+      <div class='w3-cell-row'>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='AUTOON'><input type='hidden' value='0' name='na'><input type='submit' value='Automatic' class='w3-button w3-green w3-round-large'></form>
+        </div>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='MANON'><input type='hidden' value='0' name='na'><input type='submit' value='Manual ON' class='w3-button w3-green w3-round-large'></form>
+        </div>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='MANOFF'><input type='hidden' value='0' name='na'><input type='submit' value='Manual OFF' class='w3-button w3-red w3-round-large'></form>
+        </div>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Temp. ON' class='w3-button w3-yellow w3-round-large'></form>
+        </div>
       </div>
+    </div>
+    <h3>Functions</h3>
+    <div class='w3-panel w3-card-4 w3-white w3-round-large w3-center'>
+      <div class='w3-cell-row'> 
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value=' Bump ' class='w3-button w3-blue w3-round-large'></form>
+        </div>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time' class='w3-button w3-blue w3-round-large'></form>
+        </div>
+      </div>
+      <script>
+        function synctime(){
+          let currentDate=new Date();
+          let cDoW=currentDate.getDay();
+          let cDay=currentDate.getDate();
+          let cMonth=currentDate.getMonth()+1;
+          let cYear=currentDate.getYear()-100;
+          let cHour=currentDate.getHours();
+          let cMins=currentDate.getMinutes();
+          let cSec=currentDate.getSeconds();
+          
+          document.getElementById('time').innerHTML='<input type=hidden name=SETDOW value='
+            +cDoW+'><input type=hidden name=SETDATE value='
+            +cDay+'><input type=hidden name=SETMNTH value='
+            +cMonth+'><input type=hidden name=SETYEAR value='
+            +cYear+'><input type=hidden name=SETHR value='
+            +cHour+'><input type=hidden name=SETMIN value='
+            +cMins+'><input type=hidden name=SETSEC value='
+            +cSec+'>';
+        }
+      </script>
     </div>
 )====";
 String html_3 = "";
 String html_4 = R"====(
-       <div class='w3-panel w3-card-4 w3-white w3-round-large'>
-          <div class='w3-container w3-center w3-padding'>
-            <a href='index' class='w3-button w3-blue w3-round-large'>Main Page</a> - <a href='confg' class='w3-button w3-blue w3-round-large'>Configuration Page</a> - <a href='sched' class='w3-button w3-blue w3-round-large'>Schedual Page</a>
+        <h3>Navigation</h3>
+        <div class='w3-panel w3-card-4 w3-white w3-round-large w3-center'>
+          <div class='w3-cell-row'>
+            <div class='w3-container w3-cell w3-mobile w3-padding'>
+              <a href='index' class='w3-button w3-blue w3-round-large'>Main Page</a>
+            </div>
+            <div class='w3-container w3-cell w3-mobile w3-padding'>
+              <a href='confg' class='w3-button w3-blue w3-round-large'>Configuration Page</a>
+            </div>
+            <div class='w3-container w3-cell w3-mobile w3-padding'>
+              <a href='sched' class='w3-button w3-blue w3-round-large'>Schedual Page</a>
+            </div>
           </div>
         </div>
       </div>
