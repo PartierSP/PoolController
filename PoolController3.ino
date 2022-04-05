@@ -86,32 +86,7 @@ void loop() {
   int row;
   
   CheckOutput();
-  Minute=Clock.getMinute();
-  i=Schedule[mode][Minute];
-//  if(i==digitalRead(Pool_Pin)){
-//    Serial.print("Running Mode: ");
-//    Serial.println(mode);
-//  }
-  switch(function){
-    case 0:
-      if(ManOveride==true){
-        if(Minute==ManOvOff){
-          digitalWrite(Pool_Pin, true);
-          ManOveride=false;
-        }else{
-          digitalWrite(Pool_Pin,false);
-        }
-      }else{
-        digitalWrite(Pool_Pin, !i);
-      }
-      break;
-    case 1:
-      digitalWrite(Pool_Pin, 0);
-      break;
-    case 2:
-      digitalWrite(Pool_Pin, 1);
-      break;
-  }
+  UpdateOutput();
 
   delay(50);
 
@@ -334,6 +309,8 @@ void loop() {
       }
     }
 
+    UpdateOutput();
+    
     updatestatus();
     client.flush();
     client.print(header);
@@ -476,5 +453,37 @@ void CheckOutput(){
       mode=Program[i][2];
       line=i;
     }
+  }
+}
+
+void UpdateOutput(){
+
+  int i;
+  
+  Minute=Clock.getMinute();
+  i=Schedule[mode][Minute];
+//  if(i==digitalRead(Pool_Pin)){
+//    Serial.print("Running Mode: ");
+//    Serial.println(mode);
+//  }
+  switch(function){
+    case 0:
+      if(ManOveride==true){
+        if(Minute==ManOvOff){
+          digitalWrite(Pool_Pin, true);
+          ManOveride=false;
+        }else{
+          digitalWrite(Pool_Pin,false);
+        }
+      }else{
+        digitalWrite(Pool_Pin, !i);
+      }
+      break;
+    case 1:
+      digitalWrite(Pool_Pin, 0);
+      break;
+    case 2:
+      digitalWrite(Pool_Pin, 1);
+      break;
   }
 }
