@@ -17,23 +17,6 @@ String html_1 = R"====(<!DOCTYPE html><html>
         <h3>Status</h3>
 )====";
 String html_2 = R"====(
-    <h3>Mode</h3>
-    <div class='w3-panel w3-card-4 w3-white w3-round-large w3-center'>
-      <div class='w3-cell-row'>
-        <div class='w3-container w3-cell w3-mobile w3-padding'>
-          <form method='get'><input type='hidden' value='1' name='AUTOON'><input type='hidden' value='0' name='na'><input type='submit' value='Automatic' class='w3-button w3-green w3-round-large'></form>
-        </div>
-        <div class='w3-container w3-cell w3-mobile w3-padding'>
-          <form method='get'><input type='hidden' value='1' name='MANON'><input type='hidden' value='0' name='na'><input type='submit' value='Manual ON' class='w3-button w3-green w3-round-large'></form>
-        </div>
-        <div class='w3-container w3-cell w3-mobile w3-padding'>
-          <form method='get'><input type='hidden' value='1' name='MANOFF'><input type='hidden' value='0' name='na'><input type='submit' value='Manual OFF' class='w3-button w3-red w3-round-large'></form>
-        </div>
-        <div class='w3-container w3-cell w3-mobile w3-padding'>
-          <form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Temp. ON' class='w3-button w3-yellow w3-round-large'></form>
-        </div>
-      </div>
-    </div>
     <h3>Functions</h3>
     <div class='w3-panel w3-card-4 w3-white w3-round-large w3-center'>
       <div class='w3-cell-row'> 
@@ -67,7 +50,25 @@ String html_2 = R"====(
       </script>
     </div>
 )====";
-String html_3 = "";
+String html_3 = R"====(
+    <h3>Mode</h3>
+    <div class='w3-panel w3-card-4 w3-white w3-round-large w3-center'>
+      <div class='w3-cell-row'>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='AUTOON'><input type='hidden' value='0' name='na'><input type='submit' value='Automatic' class='w3-button w3-green w3-round-large'></form>
+        </div>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='MANON'><input type='hidden' value='0' name='na'><input type='submit' value='Manual ON' class='w3-button w3-green w3-round-large'></form>
+        </div>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='MANOFF'><input type='hidden' value='0' name='na'><input type='submit' value='Manual OFF' class='w3-button w3-red w3-round-large'></form>
+        </div>
+        <div class='w3-container w3-cell w3-mobile w3-padding'>
+          <form method='get'><input type='hidden' value='1' name='MANOVRD'><input type='hidden' value='0' name='na'><input type='submit' value='Temp. ON' class='w3-button w3-yellow w3-round-large'></form>
+        </div>
+      </div>
+    </div>
+)====";
 String html_4 = R"====(
         <h3>Navigation</h3>
         <div class='w3-panel w3-card-4 w3-white w3-round-large w3-center'>

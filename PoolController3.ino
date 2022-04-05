@@ -124,6 +124,7 @@ void loop() {
   request=client.readStringUntil('\r');
   Serial.println(request);
   if(request.indexOf("confg")>0){
+    //Config page requested
     idx=request.indexOf("confg")+5;
     while(idx<request.length()){
       c=request[idx];
@@ -138,11 +139,7 @@ void loop() {
       }else if(c=='&'){
         editvalue=0;
 
-        html_3.concat(desc);
-        html_3.concat("=");
-        html_3.concat(value);
-        html_3.concat("<br/>");
-        Serial.print(desc);
+       Serial.print(desc);
         Serial.print("=");
         Serial.println(value);
         if(strcmp("SETMIN",desc)==0){
@@ -195,30 +192,7 @@ void loop() {
             Serial.println(i);
             digitalWrite(Pool_Pin,i);
           }
-        } else if(strcmp("MANOVRD",desc)==0){
-          Serial.println("Starting Manual Overide");
-          if(Minute>0){
-            ManOvOff=Minute-1;
-          }else{
-            ManOvOff=59;
-          }
-          ManOveride=true;
-          function=0;
-        } else if(strcmp("MANON",desc)==0){
-          Serial.println("Manual ON");
-          function=1;
-          ManOveride=false;
-        } else if(strcmp("MANOFF",desc)==0){
-          Serial.println("Manual OFF");
-          function=2;
-          ManOveride=false;
-        } else if(strcmp("AUTOON",desc)==0){
-          Serial.println("Automatic Mode");
-          function=0;
-          ManOveride=false;
         }
-        desc[0]='\0';
-        value[0]='\0';
       }
       idx++;
     }
@@ -229,9 +203,9 @@ void loop() {
     client.print(html_status);
     client.print(html_2);
     client.print(html_4);
-    html_3="";
 
   }else if(request.indexOf("sched")>0){
+    //Schedual page requested
     idx=request.indexOf("sched")+5;
     while(idx<request.length()){
       c=request[idx];
@@ -246,10 +220,6 @@ void loop() {
       }else if(c=='&'){
         editvalue=0;
 
-        html_3.concat(desc);
-        html_3.concat("=");
-        html_3.concat(value);
-        html_3.concat("<br/>");
         Serial.print(desc);
         Serial.print("=");
         Serial.println(value);
@@ -279,7 +249,6 @@ void loop() {
     client.print(header);
     client.print(html_1);
     client.print(html_status);
-//    client.print(html_3);  // Send debug info to client.
     client.print(html_5);
     for(int i=0;i<8;i++){
       client.print("<tr>");
@@ -312,15 +281,65 @@ void loop() {
     }
     client.print(html_8);
     client.print(html_4);
-    html_3="";
     
     
   }else{
+    //Index page requested
+    if(request.indexOf("?")>0){
+      idx=request.indexOf("?")+1;
+      while(idx<request.length()){
+        c=request[idx];
+        if(isalnum(c)){
+          if(editvalue==1){
+            append(value,c);
+          }else{
+            append(desc,c);
+          }
+        }else if(c=='='){
+          editvalue=1;
+        }else if(c=='&'){
+          editvalue=0;
+  
+          Serial.print(desc);
+          Serial.print("=");
+          Serial.println(value);
+  
+          if(strcmp("MANOVRD",desc)==0){
+            Serial.println("Starting Manual Overide");
+            if(Minute>0){
+              ManOvOff=Minute-1;
+            }else{
+              ManOvOff=59;
+            }
+            ManOveride=true;
+            function=0;
+          } else if(strcmp("MANON",desc)==0){
+            Serial.println("Manual ON");
+            function=1;
+            ManOveride=false;
+          } else if(strcmp("MANOFF",desc)==0){
+            Serial.println("Manual OFF");
+            function=2;
+            ManOveride=false;
+          } else if(strcmp("AUTOON",desc)==0){
+            Serial.println("Automatic Mode");
+            function=0;
+            ManOveride=false;
+          }
+          desc[0]='\0';
+          value[0]='\0';
+        }
+        idx++;
+
+      }
+    }
+
     updatestatus();
     client.flush();
     client.print(header);
     client.print(html_1);
     client.print(html_status);
+    client.print(html_3);
     client.print(html_4);
   }
 
