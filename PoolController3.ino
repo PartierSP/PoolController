@@ -17,6 +17,17 @@
 char ssid[]=SSID_NAME;
 char pass[]=NET_PASSWD;
 
+long Tier_1_Savings=0;
+long Tier_2_Savings=0;
+long Tier_3_Savings=0;
+
+long Tier_1_Used=0;
+long Tier_2_Used=0;
+long Tier_3_Used=0;
+
+int Tier_Mode=0;
+int Last_Min=0;
+
 WiFiServer server(80);
 DS3231 Clock;
 bool century = false;
@@ -329,25 +340,29 @@ void updatestatus(){
   int x;
   long rssi;
   int sgnl;
+  float kwSavings;
+  float Savings;
+  float kwUsed;
+  float Used;
   
   getdatetime();
   i=digitalRead(Pool_Pin);
   rssi = WiFi.RSSI();
   sgnl=map(rssi, MIN_VAL, MAX_VAL, 0, 100); 
 
-  html_status="<div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'><table class='w3-table w3-bordered'><tr><th style='width:25%'>Time:</th><td>";
+  html_status="<div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'><table class='w3-table w3-bordered'><tr><th style='width:25%'>Time:</th><td colspan='4'>";
   html_status.concat(curdatetime);
-  html_status.concat("</td></tr><tr><th>Pump:</th><td class='w3-text-");
+  html_status.concat("</td></tr><tr><th>Pump:</th><td colspan='4' class='w3-text-");
   if(i==0){
     html_status.concat("green'><b>On");
   }else{
     html_status.concat("red'><b>Off");
   }
-  html_status.concat("</b></td></tr><tr><th>Mode:</th><td>");
+  html_status.concat("</b></td></tr><tr><th>Mode:</th><td colspan='4'>");
   switch(function){
     case 0:
       if(ManOveride==true){
-        html_status.concat("Temporary ON</td></tr><tr><th>Remaining:</th><td><div class='w3-container w3-center w3-green' style='width:");
+        html_status.concat("Temporary ON</td></tr><tr><th>Remaining:</th><td colspan='4'><div class='w3-container w3-center w3-green' style='width:");
         i=ManOvOff-Minute;
         if(i<0){
           i=i+60;
@@ -359,7 +374,7 @@ void updatestatus(){
         html_status.concat("mins</div></td></tr>");
       }else{
         html_status.concat("Automatic</td></tr>");
-        html_status.concat("<tr><th>Power: </th><td><div class='w3-container w3-center w3-green' style='width:");
+        html_status.concat("<tr><th>Power: </th><td colspan='4'><div class='w3-container w3-center w3-green' style='width:");
         html_status.concat(ModeDesc[mode]);
         html_status.concat("%'>");
         html_status.concat(ModeDesc[mode]);
@@ -373,9 +388,9 @@ void updatestatus(){
       html_status.concat("Manual Off");
       break;
   }
-  html_status.concat("<tr><th>Prg Line: </th><td>");
+  html_status.concat("<tr><th>Prg Line: </th><td colspan='4'>");
   html_status.concat(line);
-  html_status.concat("</td></tr><tr><th>Signal Strength</th><td><div class='w3-container w3-center w3-");
+  html_status.concat("</td></tr><tr><th>Signal Strength:</th><td colspan='4'><div class='w3-container w3-center w3-");
   if (sgnl>30){
     html_status.concat("green");
   }else{
@@ -389,7 +404,55 @@ void updatestatus(){
   html_status.concat(sgnl);
   html_status.concat("%'>");
   html_status.concat(sgnl);
-  html_status.concat("%</div></td></tr></table><br></div>");
+  html_status.concat("%</div></td></tr><tr><td></td><th>Tier 1</th><th>Tier 2</th><th>Tier 3</th><th>Total</th></tr><tr><th>Used:</th><td>");
+  kwUsed=Tier_1_Used * Wattage / (float)60000;
+  html_status.concat(kwUsed);
+  html_status.concat(" kWHr<br>$ ");
+  Used=Tier_1_Used * Tier_1_Rate * Wattage / 60000;
+  html_status.concat(Used);
+  html_status.concat("</td><td>");
+  kwUsed=Tier_2_Used * Wattage / (float)60000;
+  html_status.concat(kwUsed);
+  html_status.concat(" kWHr<br>$ ");
+  Used=Tier_2_Used * Tier_2_Rate * Wattage / 60000;
+  html_status.concat(Used);
+  html_status.concat("</td><td>");
+  kwUsed=Tier_3_Used * Wattage / (float)60000;
+  html_status.concat(kwUsed);
+  html_status.concat(" kWHr<br>$ ");
+  Used=Tier_3_Used * Tier_3_Rate * Wattage / 60000;
+  html_status.concat(Used);
+  html_status.concat("</td><td>");
+  kwUsed=(Tier_1_Used + Tier_2_Used + Tier_3_Used) * Wattage / (float)60000;
+  html_status.concat(kwUsed);
+  html_status.concat(" kWHr<br>$ ");
+  Used=((Tier_1_Used * Tier_1_Rate) + (Tier_2_Used * Tier_2_Rate) + (Tier_3_Used * Tier_3_Rate)) * Wattage / 60000;
+  html_status.concat(Used);
+  html_status.concat("</td></tr><tr><th>Savings:</th><td>");
+  kwSavings=Tier_1_Savings * Wattage / (float)60000;
+  html_status.concat(kwSavings);
+  html_status.concat(" kWHr<br>$ ");
+  Savings=Tier_1_Savings * Tier_1_Rate * Wattage / 60000;
+  html_status.concat(Savings);
+  html_status.concat("</td><td>");
+  kwSavings=Tier_2_Savings * Wattage / (float)60000;
+  html_status.concat(kwSavings);
+  html_status.concat(" kWHr<br>$ ");
+  Savings=Tier_2_Savings * Tier_2_Rate * Wattage / 60000;
+  html_status.concat(Savings);
+  html_status.concat("</td><td>");
+  kwSavings=Tier_3_Savings * Wattage / (float)60000;
+  html_status.concat(kwSavings);
+  html_status.concat(" kWHr<br>$ ");
+  Savings=Tier_3_Savings * Tier_3_Rate * Wattage / 60000;
+  html_status.concat(Savings);
+  html_status.concat("</td><td>");
+  kwSavings=(Tier_1_Savings + Tier_2_Savings + Tier_3_Savings) * Wattage / (float)60000;
+  html_status.concat(kwSavings);
+  html_status.concat(" kWHr<br>$ ");
+  Savings=((Tier_1_Savings * Tier_1_Rate) + (Tier_2_Savings * Tier_2_Rate) + (Tier_3_Savings * Tier_3_Rate)) * Wattage / 60000;
+  html_status.concat(Savings);
+  html_status.concat("</td></tr></table><br></div>");
   
   
 }
@@ -485,5 +548,33 @@ void UpdateOutput(){
     case 2:
       digitalWrite(Pool_Pin, 1);
       break;
+  }
+  if(Minute!=Last_Min){
+    if(digitalRead(Pool_Pin)==true){
+      switch(Tier_Mode){
+        case 0:
+          Tier_1_Savings++;
+          break;
+        case 1:
+          Tier_2_Savings++;
+          break;
+        case 2:
+          Tier_3_Savings++;
+          break;
+      }    
+    }else{
+      switch(Tier_Mode){
+        case 0:
+          Tier_1_Used++;
+          break;
+        case 1:
+          Tier_2_Used++;
+          break;
+        case 2:
+          Tier_3_Used++;
+          break;
+      }    
+    }
+    Last_Min=Minute;
   }
 }
