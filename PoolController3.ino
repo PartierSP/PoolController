@@ -457,13 +457,13 @@ void updatestatus(){
   html_status.concat(Tier_Mode);
   html_status.concat(": $");
   switch(Tier_Mode){
-    case 1:
+    case 0:
       html_status.concat(Tier_1_Rate);
       break;
-    case 2:
+    case 1:
       html_status.concat(Tier_2_Rate);
       break;
-    case 3:
+    case 2:
       html_status.concat(Tier_3_Rate);
       break;
   }
@@ -596,7 +596,7 @@ void CheckOutput(){
       line=i;
     }
     if((ToU[i][0]*100)+ToU[i][1]<=product){
-      Tier_Mode=ToU[i][2];
+      Tier_Mode=ToU[i][2]-1;
     }
   }
 }
