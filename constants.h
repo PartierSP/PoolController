@@ -8,7 +8,7 @@ const float Tier_3_Rate=0.17;
 const int Wattage=830;
 
 const String sDoW[8]={"Sun", "Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"};
-const int Max[3]={23, 55, 4};
+const int Max[6]={23, 55, 4, 23, 55, 3};
 const int Step[3]={1,5,1};
 const int ModeDesc[5]={0,25,50,75,100};
 

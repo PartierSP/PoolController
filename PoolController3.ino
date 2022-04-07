@@ -17,13 +17,13 @@
 char ssid[]=SSID_NAME;
 char pass[]=NET_PASSWD;
 
-long Tier_1_Savings=0;
-long Tier_2_Savings=0;
-long Tier_3_Savings=0;
+int Tier_1_Savings=0;
+int Tier_2_Savings=0;
+int Tier_3_Savings=0;
 
-long Tier_1_Used=0;
-long Tier_2_Used=0;
-long Tier_3_Used=0;
+int Tier_1_Used=0;
+int Tier_2_Used=0;
+int Tier_3_Used=0;
 
 int Tier_Mode=0;
 int Last_Min=0;
@@ -50,6 +50,9 @@ String request = "";
 byte Program[8][3]; //program schedule.  Rows 0~3=Weekdays, Rows 4~7=Weekends
                     //                   Col 2=Powerlevel, Col 0=Hour & Col1=Mins for start time.
 
+byte ToU[8][3];     //Time of Use   Rows 0~3=Weekdays, Rows 4~7=Weekends
+                    //              Col 2=Rate, Col 0=Hour & Col1=Mins for start time.
+
 void setup() {
   Serial.begin(115200);
   pinMode(Pool_Pin, OUTPUT);
@@ -57,10 +60,11 @@ void setup() {
 
   Wire.begin();
 
-  EEPROM.begin(32);
+  EEPROM.begin(64);
   for(int i=0;i<8;i++){
     for(int x=0;x<4;x++){
       Program[i][x]=EEPROM.read(i*4+x);
+      ToU[i][x]=EEPROM.read(i*4+x+28);
     }
   }
 
@@ -125,7 +129,7 @@ void loop() {
       }else if(c=='&'){
         editvalue=0;
 
-       Serial.print(desc);
+        Serial.print(desc);
         Serial.print("=");
         Serial.println(value);
         if(strcmp("SETMIN",desc)==0){
@@ -178,15 +182,72 @@ void loop() {
             Serial.println(i);
             digitalWrite(Pool_Pin,i);
           }
+        } else {
+          String s_desc=convertToString(desc,sizeof(desc));
+          if(s_desc.startsWith("prog5B")){
+            row=(int)desc[6]-48;
+            col=(int)desc[11]-48;
+            ToU[row][col]=atoi(value);
+            EEPROM.put(row*4+col+28,ToU[row][col]);
+            Serial.print("Row: ");
+            Serial.print(row);
+            Serial.print(" Col: ");
+            Serial.print(col);
+            Serial.print(" Value: ");
+            Serial.println(ToU[row][col]);
+          }
         }
+        desc[0]='\0';
+        value[0]='\0';
       }
       idx++;
     }
+    EEPROM.commit();
     updatestatus();
     client.flush();
     client.print(header);
     client.print(html_1);
     client.print(html_status);
+    client.print("<h3>Time of Use</h3>");
+    client.print(html_5);
+    client.print("Tier");
+    client.print(html_9);
+    for(int i=0;i<8;i++){
+      client.print("<tr>");
+      if(i==0){
+        client.print(html_6);
+      }else if(i==4){
+        client.print(html_7);
+      }
+      client.print("<td><input type=text value=");
+      client.print(i);
+      client.print(" disabled class='w3-input w3-border-0'></td>");
+      for(int x=0;x<3;x++){
+        client.print("<td");
+        if(x<2){
+          client.print(" class='w3-pale-green'");
+        }
+        client.print("><input type=number name=prog[");
+        client.print(i);
+        client.print("][");
+        client.print(x);
+        client.print("] min=");
+        if(x==2){
+          client.print("1");
+        }else{
+          client.print("0");
+        }
+        client.print(" max=");
+        client.print(Max[x+3]);
+        client.print(" step=");
+        client.print(Step[x]);
+        client.print(" value=");
+        client.print(ToU[i][x]);
+        client.print(" class='w3-input w3-border-0'></td>");
+      }
+      client.print("</tr>");
+    }
+    client.print(html_8);
     client.print(html_2);
     client.print(html_4);
 
@@ -236,6 +297,8 @@ void loop() {
     client.print(html_1);
     client.print(html_status);
     client.print(html_5);
+    client.print("Power");
+    client.print(html_9);
     for(int i=0;i<8;i++){
       client.print("<tr>");
       if(i==0){
@@ -388,8 +451,23 @@ void updatestatus(){
       html_status.concat("Manual Off");
       break;
   }
-  html_status.concat("<tr><th>Prg Line: </th><td colspan='4'>");
+  html_status.concat("<tr><th>Prg Line: </th><td colspan='2'>");
   html_status.concat(line);
+  html_status.concat("</td><td colspan='2'>Tier ");
+  html_status.concat(Tier_Mode);
+  html_status.concat(": $");
+  switch(Tier_Mode){
+    case 1:
+      html_status.concat(Tier_1_Rate);
+      break;
+    case 2:
+      html_status.concat(Tier_2_Rate);
+      break;
+    case 3:
+      html_status.concat(Tier_3_Rate);
+      break;
+  }
+  html_status.concat("/kWhr");
   html_status.concat("</td></tr><tr><th>Signal Strength:</th><td colspan='4'><div class='w3-container w3-center w3-");
   if (sgnl>30){
     html_status.concat("green");
@@ -510,11 +588,15 @@ void CheckOutput(){
   product=(Hour*100)+Minute;
 
   mode=Program[3+x][2];
+  Tier_Mode=ToU[3+x][2];
   line=3;
   for(i=0+x;i<4+x;i++){
     if((Program[i][0]*100)+Program[i][1]<=product){
       mode=Program[i][2];
       line=i;
+    }
+    if((ToU[i][0]*100)+ToU[i][1]<=product){
+      Tier_Mode=ToU[i][2];
     }
   }
 }
@@ -576,5 +658,11 @@ void UpdateOutput(){
       }    
     }
     Last_Min=Minute;
+    Serial.print("Tier1=");
+    Serial.println(Tier_1_Used);
+    Serial.print("Tier2=");
+    Serial.println(Tier_2_Used);
+    Serial.print("Tier3=");
+    Serial.println(Tier_3_Used);
   }
 }

@@ -91,7 +91,8 @@ String html_4 = R"====(
 </html>
 )====";
 String html_5 = R"====(        <div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'>
-          <form method='get'><table class='w3-table w3-bordered w3-centered'><tr><th>Day</th><th>Line</th><th colspan=2 class='w3-pale-green'>Time</th><th>Power</th></tr>)====";
+          <form method='get'><table class='w3-table w3-bordered w3-centered'><tr><th>Day</th><th>Line</th><th colspan=2 class='w3-pale-green'>Time</th><th>)====";
 String html_6 = "<td rowspan=4><input type=text value=Weekend disabled class='w3-input w3-border-0'></td>";
 String html_7 = "<td rowspan=4><input type=text value=Weekday disabled class='w3-input w3-border-0'></td>";
-String html_8 = "</table><p><input type=hidden value=0 name=na><input type=submit value='Update Schedule' class='w3-button w3-blue w3-round-large'></p></form></div>";
+String html_8 = "</table><p><input type=hidden value=0 name=na><input type=submit value='Update' class='w3-button w3-blue w3-round-large'></p></form></div>";
+String html_9 = "</th></tr>";
