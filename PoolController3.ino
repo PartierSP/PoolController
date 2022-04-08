@@ -256,6 +256,9 @@ void loop() {
     client.print(html_12);
     client.print(Tier_3_Rate*100);
     client.print(html_13);
+    client.print(html_14);
+    client.print(Wattage);
+    client.print(html_13);
     client.print(html_8);
     client.print(html_2);
     client.print(html_4);
