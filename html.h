@@ -96,3 +96,11 @@ String html_6 = "<td rowspan=4><input type=text value=Weekend disabled class='w3
 String html_7 = "<td rowspan=4><input type=text value=Weekday disabled class='w3-input w3-border-0'></td>";
 String html_8 = "</table><p><input type=hidden value=0 name=na><input type=submit value='Update' class='w3-button w3-blue w3-round-large'></p></form></div>";
 String html_9 = "</th></tr>";
+String html_10 = R"====(
+            <tr><th colspan='5'>Rates &cent;/kWhr</th></tr>
+            <tr><th colspan='2'>Tier 1</th><td colspan='3'><input type=number name=TIER1RATE min=0 step=0.1 value=)====";
+String html_11 = R"====(
+            <tr><th colspan='2'>Tier 2</th><td colspan='3'><input type=number name=TIER2RATE min=0 step=0.1 value=)====";
+String html_12 = R"====(
+            <tr><th colspan='2'>Tier 3</th><td colspan='3'><input type=number name=TIER3RATE min=0 step=0.1 value=)====";
+String html_13 = R"====( class='w3-input w3-border-0'></td></tr>)====";

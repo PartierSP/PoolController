@@ -247,6 +247,15 @@ void loop() {
       }
       client.print("</tr>");
     }
+    client.print(html_10);
+    client.print(Tier_1_Rate*100);
+    client.print(html_13);
+    client.print(html_11);
+    client.print(Tier_2_Rate*100);
+    client.print(html_13);
+    client.print(html_12);
+    client.print(Tier_3_Rate*100);
+    client.print(html_13);
     client.print(html_8);
     client.print(html_2);
     client.print(html_4);
@@ -454,7 +463,7 @@ void updatestatus(){
   html_status.concat("<tr><th>Prg Line: </th><td colspan='2'>");
   html_status.concat(line);
   html_status.concat("</td><td colspan='2'>Tier ");
-  html_status.concat(Tier_Mode);
+  html_status.concat(Tier_Mode+1);
   html_status.concat(": $");
   switch(Tier_Mode){
     case 0:
@@ -488,18 +497,24 @@ void updatestatus(){
   html_status.concat(" kWHr<br>$ ");
   Used=Tier_1_Used * Tier_1_Rate * Wattage / 60000;
   html_status.concat(Used);
+  html_status.concat("<br>");
+  html_status.concat(Tier_1_Used);
   html_status.concat("</td><td>");
   kwUsed=Tier_2_Used * Wattage / (float)60000;
   html_status.concat(kwUsed);
   html_status.concat(" kWHr<br>$ ");
   Used=Tier_2_Used * Tier_2_Rate * Wattage / 60000;
   html_status.concat(Used);
+  html_status.concat("<br>");
+  html_status.concat(Tier_2_Used);
   html_status.concat("</td><td>");
   kwUsed=Tier_3_Used * Wattage / (float)60000;
   html_status.concat(kwUsed);
   html_status.concat(" kWHr<br>$ ");
   Used=Tier_3_Used * Tier_3_Rate * Wattage / 60000;
   html_status.concat(Used);
+  html_status.concat("<br>");
+  html_status.concat(Tier_3_Used);
   html_status.concat("</td><td>");
   kwUsed=(Tier_1_Used + Tier_2_Used + Tier_3_Used) * Wattage / (float)60000;
   html_status.concat(kwUsed);
@@ -588,7 +603,7 @@ void CheckOutput(){
   product=(Hour*100)+Minute;
 
   mode=Program[3+x][2];
-  Tier_Mode=ToU[3+x][2];
+  Tier_Mode=ToU[3+x][2]-1;
   line=3;
   for(i=0+x;i<4+x;i++){
     if((Program[i][0]*100)+Program[i][1]<=product){
