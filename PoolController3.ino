@@ -1,7 +1,7 @@
 #include <DS3231.h>
-#include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <Wire.h>
+#include <uEEPROMLib.h>
 #include "config.h"
 #include "constants.h"
 #include "html.h"
@@ -13,6 +13,9 @@
 //  #define SSID_NAME "myssid"
 //  #define NET_PASSWD "mypassword"
 //
+
+//uEEPROMLib eeprom(0x57);
+uEEPROMLib eeprom;
 
 char ssid[]=SSID_NAME;
 char pass[]=NET_PASSWD;
@@ -27,6 +30,13 @@ int Tier_3_Used=0;
 
 int Tier_Mode=0;
 int Last_Min=0;
+
+float Tier_1_Rate;
+float Tier_2_Rate;
+float Tier_3_Rate;
+
+int Wattage;
+
 
 WiFiServer server(80);
 DS3231 Clock;
@@ -60,14 +70,27 @@ void setup() {
 
   Wire.begin();
 
-  EEPROM.begin(64);
+  delay(500);
+
   for(int i=0;i<8;i++){
-    for(int x=0;x<4;x++){
-      Program[i][x]=EEPROM.read(i*4+x);
-      ToU[i][x]=EEPROM.read(i*4+x+28);
+    for(int x=0;x<3;x++){
+      Program[i][x]=eeprom.eeprom_read(i*3+x);
+      ToU[i][x]=eeprom.eeprom_read(i*3+x+24);
     }
   }
+  Tier_1_Rate=eeprom.eeprom_read(48);
+  Tier_2_Rate=eeprom.eeprom_read(52);
+  Tier_3_Rate=eeprom.eeprom_read(56);
+  Wattage=eeprom.eeprom_read(60);
 
+  Serial.println(Tier_1_Rate);
+  Serial.println(Tier_2_Rate);
+  Serial.println(Tier_3_Rate);
+
+  Tier_1_Rate=Tier_1_Rate/(float)1000;
+  Tier_2_Rate=Tier_2_Rate/(float)1000;
+  Tier_3_Rate=Tier_3_Rate/(float)1000;
+  
   ManOveride=false;
 
   Serial.print("Connecting to ");
@@ -182,13 +205,39 @@ void loop() {
             Serial.println(i);
             digitalWrite(Pool_Pin,i);
           }
+        } else if(strcmp("TIER1RATE",desc)==0){
+          Serial.print("Tier Rate 1 is now settings to: ");
+          Serial.println(value);
+          i=atoi(value);
+          Serial.println(i);
+          eeprom.eeprom_write(48,i);
+          Tier_1_Rate=(float)i/(float)10000;
+        } else if(strcmp("TIER2RATE",desc)==0){
+          Serial.print("Tier Rate 2 is now settings to: ");
+          Serial.println(value);
+          i=atoi(value);
+          Serial.println(i);
+          eeprom.eeprom_write(52,i);
+          Tier_2_Rate=(float)i/(float)10000;
+        } else if(strcmp("TIER3RATE",desc)==0){
+          Serial.print("Tier Rate 3 is now settings to: ");
+          Serial.println(value);
+          i=atoi(value);
+          Serial.println(i);
+          eeprom.eeprom_write(56,i);
+          Tier_3_Rate=(float)i/(float)10000;
+        } else if(strcmp("WATTAGE",desc)==0){
+          Serial.print("Wattage is now settings to: ");
+          Serial.println(value);
+          Wattage=atoi(value);
+          eeprom.eeprom_write(60,Wattage);
         } else {
           String s_desc=convertToString(desc,sizeof(desc));
           if(s_desc.startsWith("prog5B")){
             row=(int)desc[6]-48;
             col=(int)desc[11]-48;
             ToU[row][col]=atoi(value);
-            EEPROM.put(row*4+col+28,ToU[row][col]);
+            eeprom.eeprom_write(row*3+col+24,ToU[row][col]);
             Serial.print("Row: ");
             Serial.print(row);
             Serial.print(" Col: ");
@@ -202,7 +251,6 @@ void loop() {
       }
       idx++;
     }
-    EEPROM.commit();
     updatestatus();
     client.flush();
     client.print(header);
@@ -288,7 +336,7 @@ void loop() {
           row=(int)desc[6]-48;
           col=(int)desc[11]-48;
           Program[row][col]=atoi(value);
-          EEPROM.put(row*4+col,Program[row][col]);
+          eeprom.eeprom_write(row*3+col,Program[row][col]);
           Serial.print("Row: ");
           Serial.print(row);
           Serial.print(" Col: ");
@@ -302,7 +350,6 @@ void loop() {
       }
       idx++;
     }
-    EEPROM.commit();
     updatestatus();
     client.flush();
     client.print(header);
@@ -500,24 +547,18 @@ void updatestatus(){
   html_status.concat(" kWHr<br>$ ");
   Used=Tier_1_Used * Tier_1_Rate * Wattage / 60000;
   html_status.concat(Used);
-  html_status.concat("<br>");
-  html_status.concat(Tier_1_Used);
   html_status.concat("</td><td>");
   kwUsed=Tier_2_Used * Wattage / (float)60000;
   html_status.concat(kwUsed);
   html_status.concat(" kWHr<br>$ ");
   Used=Tier_2_Used * Tier_2_Rate * Wattage / 60000;
   html_status.concat(Used);
-  html_status.concat("<br>");
-  html_status.concat(Tier_2_Used);
   html_status.concat("</td><td>");
   kwUsed=Tier_3_Used * Wattage / (float)60000;
   html_status.concat(kwUsed);
   html_status.concat(" kWHr<br>$ ");
   Used=Tier_3_Used * Tier_3_Rate * Wattage / 60000;
   html_status.concat(Used);
-  html_status.concat("<br>");
-  html_status.concat(Tier_3_Used);
   html_status.concat("</td><td>");
   kwUsed=(Tier_1_Used + Tier_2_Used + Tier_3_Used) * Wattage / (float)60000;
   html_status.concat(kwUsed);
