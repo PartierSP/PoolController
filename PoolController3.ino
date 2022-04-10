@@ -81,7 +81,7 @@ void setup() {
   Tier_1_Rate=eeprom.eeprom_read(48);
   Tier_2_Rate=eeprom.eeprom_read(52);
   Tier_3_Rate=eeprom.eeprom_read(56);
-  Wattage=eeprom.eeprom_read(60);
+  Wattage=eeprom.eeprom_read(60)*5;
 
   Serial.println(Tier_1_Rate);
   Serial.println(Tier_2_Rate);
@@ -122,6 +122,8 @@ void loop() {
   int i;
   int col;
   int row;
+  int a;
+  int b;
   
   CheckOutput();
   UpdateOutput();
@@ -210,27 +212,27 @@ void loop() {
           Serial.println(value);
           i=atoi(value);
           Serial.println(i);
-          eeprom.eeprom_write(48,i);
+          eeprom.eeprom_write(48,i/10);
           Tier_1_Rate=(float)i/(float)10000;
         } else if(strcmp("TIER2RATE",desc)==0){
           Serial.print("Tier Rate 2 is now settings to: ");
           Serial.println(value);
           i=atoi(value);
           Serial.println(i);
-          eeprom.eeprom_write(52,i);
+          eeprom.eeprom_write(52,i/10);
           Tier_2_Rate=(float)i/(float)10000;
         } else if(strcmp("TIER3RATE",desc)==0){
           Serial.print("Tier Rate 3 is now settings to: ");
           Serial.println(value);
           i=atoi(value);
           Serial.println(i);
-          eeprom.eeprom_write(56,i);
+          eeprom.eeprom_write(56,i/10);
           Tier_3_Rate=(float)i/(float)10000;
         } else if(strcmp("WATTAGE",desc)==0){
           Serial.print("Wattage is now settings to: ");
           Serial.println(value);
           Wattage=atoi(value);
-          eeprom.eeprom_write(60,Wattage);
+          eeprom.eeprom_write(60,Wattage/5);
         } else {
           String s_desc=convertToString(desc,sizeof(desc));
           if(s_desc.startsWith("prog5B")){

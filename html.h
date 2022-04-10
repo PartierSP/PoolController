@@ -98,10 +98,10 @@ String html_8 = "</table><p><input type=hidden value=0 name=na><input type=submi
 String html_9 = "</th></tr>";
 String html_10 = R"====(
             <tr><th colspan='5'>Rates &cent;/kWhr</th></tr>
-            <tr><th colspan='2'>Tier 1</th><td colspan='3'><input type=number name=TIER1RATE min=0 step=0.1 value=)====";
+            <tr><th colspan='2'>Tier 1</th><td colspan='3'><input type=number name=TIER1RATE min=0 max=25.5 step=0.1 value=)====";
 String html_11 = R"====(
-            <tr><th colspan='2'>Tier 2</th><td colspan='3'><input type=number name=TIER2RATE min=0 step=0.1 value=)====";
+            <tr><th colspan='2'>Tier 2</th><td colspan='3'><input type=number name=TIER2RATE min=0 max=25.5 step=0.1 value=)====";
 String html_12 = R"====(
-            <tr><th colspan='2'>Tier 3</th><td colspan='3'><input type=number name=TIER3RATE min=0 step=0.1 value=)====";
+            <tr><th colspan='2'>Tier 3</th><td colspan='3'><input type=number name=TIER3RATE min=0 max=25.5 step=0.1 value=)====";
 String html_13 = " class='w3-input w3-border-0'></td></tr>";
-String html_14 = "<tr><th colspan='2'>Pump Wattage (W)</th><td colspan='3'><input type=number name=WATTAGE min=0 step=10 value=";
+String html_14 = "<tr><th colspan='2'>Pump Wattage (W)</th><td colspan='3'><input type=number name=WATTAGE min=0 max=1275 step=5 value=";
