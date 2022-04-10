@@ -1,7 +1,7 @@
 #include <DS3231.h>
-#include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <Wire.h>
+#include <uEEPROMLib.h>
 #include "config.h"
 #include "constants.h"
 #include "html.h"
@@ -14,8 +14,29 @@
 //  #define NET_PASSWD "mypassword"
 //
 
+//uEEPROMLib eeprom(0x57);
+uEEPROMLib eeprom;
+
 char ssid[]=SSID_NAME;
 char pass[]=NET_PASSWD;
+
+int Tier_1_Savings=0;
+int Tier_2_Savings=0;
+int Tier_3_Savings=0;
+
+int Tier_1_Used=0;
+int Tier_2_Used=0;
+int Tier_3_Used=0;
+
+int Tier_Mode=0;
+int Last_Min=0;
+
+float Tier_1_Rate;
+float Tier_2_Rate;
+float Tier_3_Rate;
+
+int Wattage;
+
 
 WiFiServer server(80);
 DS3231 Clock;
@@ -39,6 +60,9 @@ String request = "";
 byte Program[8][3]; //program schedule.  Rows 0~3=Weekdays, Rows 4~7=Weekends
                     //                   Col 2=Powerlevel, Col 0=Hour & Col1=Mins for start time.
 
+byte ToU[8][3];     //Time of Use   Rows 0~3=Weekdays, Rows 4~7=Weekends
+                    //              Col 2=Rate, Col 0=Hour & Col1=Mins for start time.
+
 void setup() {
   Serial.begin(115200);
   pinMode(Pool_Pin, OUTPUT);
@@ -46,13 +70,27 @@ void setup() {
 
   Wire.begin();
 
-  EEPROM.begin(32);
+  delay(500);
+
   for(int i=0;i<8;i++){
-    for(int x=0;x<4;x++){
-      Program[i][x]=EEPROM.read(i*4+x);
+    for(int x=0;x<3;x++){
+      Program[i][x]=eeprom.eeprom_read(i*3+x);
+      ToU[i][x]=eeprom.eeprom_read(i*3+x+24);
     }
   }
+  Tier_1_Rate=eeprom.eeprom_read(48);
+  Tier_2_Rate=eeprom.eeprom_read(52);
+  Tier_3_Rate=eeprom.eeprom_read(56);
+  Wattage=eeprom.eeprom_read(60)*5;
 
+  Serial.println(Tier_1_Rate);
+  Serial.println(Tier_2_Rate);
+  Serial.println(Tier_3_Rate);
+
+  Tier_1_Rate=Tier_1_Rate/(float)1000;
+  Tier_2_Rate=Tier_2_Rate/(float)1000;
+  Tier_3_Rate=Tier_3_Rate/(float)1000;
+  
   ManOveride=false;
 
   Serial.print("Connecting to ");
@@ -84,6 +122,8 @@ void loop() {
   int i;
   int col;
   int row;
+  int a;
+  int b;
   
   CheckOutput();
   UpdateOutput();
@@ -114,7 +154,7 @@ void loop() {
       }else if(c=='&'){
         editvalue=0;
 
-       Serial.print(desc);
+        Serial.print(desc);
         Serial.print("=");
         Serial.println(value);
         if(strcmp("SETMIN",desc)==0){
@@ -167,7 +207,49 @@ void loop() {
             Serial.println(i);
             digitalWrite(Pool_Pin,i);
           }
+        } else if(strcmp("TIER1RATE",desc)==0){
+          Serial.print("Tier Rate 1 is now settings to: ");
+          Serial.println(value);
+          i=atoi(value);
+          Serial.println(i);
+          eeprom.eeprom_write(48,i/10);
+          Tier_1_Rate=(float)i/(float)10000;
+        } else if(strcmp("TIER2RATE",desc)==0){
+          Serial.print("Tier Rate 2 is now settings to: ");
+          Serial.println(value);
+          i=atoi(value);
+          Serial.println(i);
+          eeprom.eeprom_write(52,i/10);
+          Tier_2_Rate=(float)i/(float)10000;
+        } else if(strcmp("TIER3RATE",desc)==0){
+          Serial.print("Tier Rate 3 is now settings to: ");
+          Serial.println(value);
+          i=atoi(value);
+          Serial.println(i);
+          eeprom.eeprom_write(56,i/10);
+          Tier_3_Rate=(float)i/(float)10000;
+        } else if(strcmp("WATTAGE",desc)==0){
+          Serial.print("Wattage is now settings to: ");
+          Serial.println(value);
+          Wattage=atoi(value);
+          eeprom.eeprom_write(60,Wattage/5);
+        } else {
+          String s_desc=convertToString(desc,sizeof(desc));
+          if(s_desc.startsWith("prog5B")){
+            row=(int)desc[6]-48;
+            col=(int)desc[11]-48;
+            ToU[row][col]=atoi(value);
+            eeprom.eeprom_write(row*3+col+24,ToU[row][col]);
+            Serial.print("Row: ");
+            Serial.print(row);
+            Serial.print(" Col: ");
+            Serial.print(col);
+            Serial.print(" Value: ");
+            Serial.println(ToU[row][col]);
+          }
         }
+        desc[0]='\0';
+        value[0]='\0';
       }
       idx++;
     }
@@ -176,6 +258,58 @@ void loop() {
     client.print(header);
     client.print(html_1);
     client.print(html_status);
+    client.print("<h3>Time of Use</h3>");
+    client.print(html_5);
+    client.print("Tier");
+    client.print(html_9);
+    for(int i=0;i<8;i++){
+      client.print("<tr>");
+      if(i==0){
+        client.print(html_6);
+      }else if(i==4){
+        client.print(html_7);
+      }
+      client.print("<td><input type=text value=");
+      client.print(i);
+      client.print(" disabled class='w3-input w3-border-0'></td>");
+      for(int x=0;x<3;x++){
+        client.print("<td");
+        if(x<2){
+          client.print(" class='w3-pale-green'");
+        }
+        client.print("><input type=number name=prog[");
+        client.print(i);
+        client.print("][");
+        client.print(x);
+        client.print("] min=");
+        if(x==2){
+          client.print("1");
+        }else{
+          client.print("0");
+        }
+        client.print(" max=");
+        client.print(Max[x+3]);
+        client.print(" step=");
+        client.print(Step[x]);
+        client.print(" value=");
+        client.print(ToU[i][x]);
+        client.print(" class='w3-input w3-border-0'></td>");
+      }
+      client.print("</tr>");
+    }
+    client.print(html_10);
+    client.print(Tier_1_Rate*100);
+    client.print(html_13);
+    client.print(html_11);
+    client.print(Tier_2_Rate*100);
+    client.print(html_13);
+    client.print(html_12);
+    client.print(Tier_3_Rate*100);
+    client.print(html_13);
+    client.print(html_14);
+    client.print(Wattage);
+    client.print(html_13);
+    client.print(html_8);
     client.print(html_2);
     client.print(html_4);
 
@@ -204,7 +338,7 @@ void loop() {
           row=(int)desc[6]-48;
           col=(int)desc[11]-48;
           Program[row][col]=atoi(value);
-          EEPROM.put(row*4+col,Program[row][col]);
+          eeprom.eeprom_write(row*3+col,Program[row][col]);
           Serial.print("Row: ");
           Serial.print(row);
           Serial.print(" Col: ");
@@ -218,13 +352,14 @@ void loop() {
       }
       idx++;
     }
-    EEPROM.commit();
     updatestatus();
     client.flush();
     client.print(header);
     client.print(html_1);
     client.print(html_status);
     client.print(html_5);
+    client.print("Power");
+    client.print(html_9);
     for(int i=0;i<8;i++){
       client.print("<tr>");
       if(i==0){
@@ -329,25 +464,29 @@ void updatestatus(){
   int x;
   long rssi;
   int sgnl;
+  float kwSavings;
+  float Savings;
+  float kwUsed;
+  float Used;
   
   getdatetime();
   i=digitalRead(Pool_Pin);
   rssi = WiFi.RSSI();
   sgnl=map(rssi, MIN_VAL, MAX_VAL, 0, 100); 
 
-  html_status="<div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'><table class='w3-table w3-bordered'><tr><th style='width:25%'>Time:</th><td>";
+  html_status="<div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'><table class='w3-table w3-bordered'><tr><th style='width:25%'>Time:</th><td colspan='4'>";
   html_status.concat(curdatetime);
-  html_status.concat("</td></tr><tr><th>Pump:</th><td class='w3-text-");
+  html_status.concat("</td></tr><tr><th>Pump:</th><td colspan='4' class='w3-text-");
   if(i==0){
     html_status.concat("green'><b>On");
   }else{
     html_status.concat("red'><b>Off");
   }
-  html_status.concat("</b></td></tr><tr><th>Mode:</th><td>");
+  html_status.concat("</b></td></tr><tr><th>Mode:</th><td colspan='4'>");
   switch(function){
     case 0:
       if(ManOveride==true){
-        html_status.concat("Temporary ON</td></tr><tr><th>Remaining:</th><td><div class='w3-container w3-center w3-green' style='width:");
+        html_status.concat("Temporary ON</td></tr><tr><th>Remaining:</th><td colspan='4'><div class='w3-container w3-center w3-green' style='width:");
         i=ManOvOff-Minute;
         if(i<0){
           i=i+60;
@@ -359,7 +498,7 @@ void updatestatus(){
         html_status.concat("mins</div></td></tr>");
       }else{
         html_status.concat("Automatic</td></tr>");
-        html_status.concat("<tr><th>Power: </th><td><div class='w3-container w3-center w3-green' style='width:");
+        html_status.concat("<tr><th>Power: </th><td colspan='4'><div class='w3-container w3-center w3-green' style='width:");
         html_status.concat(ModeDesc[mode]);
         html_status.concat("%'>");
         html_status.concat(ModeDesc[mode]);
@@ -373,9 +512,24 @@ void updatestatus(){
       html_status.concat("Manual Off");
       break;
   }
-  html_status.concat("<tr><th>Prg Line: </th><td>");
+  html_status.concat("<tr><th>Prg Line: </th><td colspan='2'>");
   html_status.concat(line);
-  html_status.concat("</td></tr><tr><th>Signal Strength</th><td><div class='w3-container w3-center w3-");
+  html_status.concat("</td><td colspan='2'>Tier ");
+  html_status.concat(Tier_Mode+1);
+  html_status.concat(": $");
+  switch(Tier_Mode){
+    case 0:
+      html_status.concat(Tier_1_Rate);
+      break;
+    case 1:
+      html_status.concat(Tier_2_Rate);
+      break;
+    case 2:
+      html_status.concat(Tier_3_Rate);
+      break;
+  }
+  html_status.concat("/kWhr");
+  html_status.concat("</td></tr><tr><th>Signal Strength:</th><td colspan='4'><div class='w3-container w3-center w3-");
   if (sgnl>30){
     html_status.concat("green");
   }else{
@@ -389,7 +543,55 @@ void updatestatus(){
   html_status.concat(sgnl);
   html_status.concat("%'>");
   html_status.concat(sgnl);
-  html_status.concat("%</div></td></tr></table><br></div>");
+  html_status.concat("%</div></td></tr><tr><td></td><th>Tier 1</th><th>Tier 2</th><th>Tier 3</th><th>Total</th></tr><tr><th>Used:</th><td>");
+  kwUsed=Tier_1_Used * Wattage / (float)60000;
+  html_status.concat(kwUsed);
+  html_status.concat(" kWHr<br>$ ");
+  Used=Tier_1_Used * Tier_1_Rate * Wattage / 60000;
+  html_status.concat(Used);
+  html_status.concat("</td><td>");
+  kwUsed=Tier_2_Used * Wattage / (float)60000;
+  html_status.concat(kwUsed);
+  html_status.concat(" kWHr<br>$ ");
+  Used=Tier_2_Used * Tier_2_Rate * Wattage / 60000;
+  html_status.concat(Used);
+  html_status.concat("</td><td>");
+  kwUsed=Tier_3_Used * Wattage / (float)60000;
+  html_status.concat(kwUsed);
+  html_status.concat(" kWHr<br>$ ");
+  Used=Tier_3_Used * Tier_3_Rate * Wattage / 60000;
+  html_status.concat(Used);
+  html_status.concat("</td><td>");
+  kwUsed=(Tier_1_Used + Tier_2_Used + Tier_3_Used) * Wattage / (float)60000;
+  html_status.concat(kwUsed);
+  html_status.concat(" kWHr<br>$ ");
+  Used=((Tier_1_Used * Tier_1_Rate) + (Tier_2_Used * Tier_2_Rate) + (Tier_3_Used * Tier_3_Rate)) * Wattage / 60000;
+  html_status.concat(Used);
+  html_status.concat("</td></tr><tr><th>Savings:</th><td>");
+  kwSavings=Tier_1_Savings * Wattage / (float)60000;
+  html_status.concat(kwSavings);
+  html_status.concat(" kWHr<br>$ ");
+  Savings=Tier_1_Savings * Tier_1_Rate * Wattage / 60000;
+  html_status.concat(Savings);
+  html_status.concat("</td><td>");
+  kwSavings=Tier_2_Savings * Wattage / (float)60000;
+  html_status.concat(kwSavings);
+  html_status.concat(" kWHr<br>$ ");
+  Savings=Tier_2_Savings * Tier_2_Rate * Wattage / 60000;
+  html_status.concat(Savings);
+  html_status.concat("</td><td>");
+  kwSavings=Tier_3_Savings * Wattage / (float)60000;
+  html_status.concat(kwSavings);
+  html_status.concat(" kWHr<br>$ ");
+  Savings=Tier_3_Savings * Tier_3_Rate * Wattage / 60000;
+  html_status.concat(Savings);
+  html_status.concat("</td><td>");
+  kwSavings=(Tier_1_Savings + Tier_2_Savings + Tier_3_Savings) * Wattage / (float)60000;
+  html_status.concat(kwSavings);
+  html_status.concat(" kWHr<br>$ ");
+  Savings=((Tier_1_Savings * Tier_1_Rate) + (Tier_2_Savings * Tier_2_Rate) + (Tier_3_Savings * Tier_3_Rate)) * Wattage / 60000;
+  html_status.concat(Savings);
+  html_status.concat("</td></tr></table><br></div>");
   
   
 }
@@ -447,11 +649,15 @@ void CheckOutput(){
   product=(Hour*100)+Minute;
 
   mode=Program[3+x][2];
+  Tier_Mode=ToU[3+x][2]-1;
   line=3;
   for(i=0+x;i<4+x;i++){
     if((Program[i][0]*100)+Program[i][1]<=product){
       mode=Program[i][2];
       line=i;
+    }
+    if((ToU[i][0]*100)+ToU[i][1]<=product){
+      Tier_Mode=ToU[i][2]-1;
     }
   }
 }
@@ -485,5 +691,39 @@ void UpdateOutput(){
     case 2:
       digitalWrite(Pool_Pin, 1);
       break;
+  }
+  if(Minute!=Last_Min){
+    if(digitalRead(Pool_Pin)==true){
+      switch(Tier_Mode){
+        case 0:
+          Tier_1_Savings++;
+          break;
+        case 1:
+          Tier_2_Savings++;
+          break;
+        case 2:
+          Tier_3_Savings++;
+          break;
+      }    
+    }else{
+      switch(Tier_Mode){
+        case 0:
+          Tier_1_Used++;
+          break;
+        case 1:
+          Tier_2_Used++;
+          break;
+        case 2:
+          Tier_3_Used++;
+          break;
+      }    
+    }
+    Last_Min=Minute;
+    Serial.print("Tier1=");
+    Serial.println(Tier_1_Used);
+    Serial.print("Tier2=");
+    Serial.println(Tier_2_Used);
+    Serial.print("Tier3=");
+    Serial.println(Tier_3_Used);
   }
 }
