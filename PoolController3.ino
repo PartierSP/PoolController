@@ -41,6 +41,7 @@ int Wattage;
 WiFiServer server(80);
 DS3231 Clock;
 bool century = false;
+int int_8[4];
 bool h12Flag;
 bool pmFlag;
 byte Hour;
@@ -90,6 +91,14 @@ void setup() {
   Tier_1_Rate=Tier_1_Rate/(float)1000;
   Tier_2_Rate=Tier_2_Rate/(float)1000;
   Tier_3_Rate=Tier_3_Rate/(float)1000;
+
+  Tier_1_Savings=getint(61);
+  Tier_2_Savings=getint(65);
+  Tier_3_Savings=getint(69);
+  Tier_1_Used=getint(73);
+  Tier_2_Used=getint(77);
+  Tier_3_Used=getint(81);
+   
   
   ManOveride=false;
 
@@ -668,10 +677,7 @@ void UpdateOutput(){
   
   Minute=Clock.getMinute();
   i=Schedule[mode][Minute];
-//  if(i==digitalRead(Pool_Pin)){
-//    Serial.print("Running Mode: ");
-//    Serial.println(mode);
-//  }
+
   switch(function){
     case 0:
       if(ManOveride==true){
@@ -719,11 +725,51 @@ void UpdateOutput(){
       }    
     }
     Last_Min=Minute;
-    Serial.print("Tier1=");
-    Serial.println(Tier_1_Used);
-    Serial.print("Tier2=");
-    Serial.println(Tier_2_Used);
-    Serial.print("Tier3=");
-    Serial.println(Tier_3_Used);
+
+    if(Minute==0){
+      //top of hour, backup power usage
+      toint8(Tier_1_Savings);
+      saveint(61);
+      toint8(Tier_2_Savings);
+      saveint(65);
+      toint8(Tier_3_Savings);
+      saveint(69);
+      toint8(Tier_1_Used);
+      saveint(73);
+      toint8(Tier_2_Used);
+      saveint(77);
+      toint8(Tier_3_Used);
+      saveint(81);
+    }
+
   }
+}
+
+void toint8 (int i){
+  int_8[0]=( i >>  0) & 0xFF;
+  int_8[1]=( i >>  8) & 0xFF;
+  int_8[2]=( i >> 16) & 0xFF;
+  int_8[3]=( i >> 24) & 0xFF;
+}
+
+void saveint(int address){
+  eeprom.eeprom_write(address+0,int_8[0]);
+  eeprom.eeprom_write(address+1,int_8[1]);
+  eeprom.eeprom_write(address+2,int_8[2]);
+  eeprom.eeprom_write(address+3,int_8[3]);
+}
+
+int getint(int address){
+  int i;
+
+  i=eeprom.eeprom_read(address+3);
+  i=i << 8;
+  i=i+eeprom.eeprom_read(address+2);
+  i=i << 8;
+  i=i+eeprom.eeprom_read(address+1);
+  i=i << 8;
+  i=i+eeprom.eeprom_read(address+0);
+
+  return i;
+
 }
