@@ -2,6 +2,8 @@
 #include <ESP8266WiFi.h>
 #include <Wire.h>
 #include <uEEPROMLib.h>
+#include <uptime_formatter.h>
+#include <uptime.h>
 #include "config.h"
 #include "constants.h"
 #include "html.h"
@@ -521,7 +523,11 @@ void updatestatus(){
       html_status.concat("Manual Off");
       break;
   }
-  html_status.concat("<tr><th>Prg Line: </th><td colspan='2'>");
+  html_status.concat("<tr><th>Uptime: </th><td colspan='2'>");
+  html_status.concat(uptime_formatter::getUptime());
+  html_status.concat("</td><td colspan='2'>>Log Length: ");
+  html_status.concat((float)((Tier_1_Used + Tier_2_Used + Tier_3_Used + Tier_1_Savings + Tier_2_Savings + Tier_3_Savings)/(float)1440));
+  html_status.concat(" days</td></tr><tr><th>Prg Line: </th><td colspan='2'>");
   html_status.concat(line);
   html_status.concat("</td><td colspan='2'>Tier ");
   html_status.concat(Tier_Mode+1);
