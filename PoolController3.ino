@@ -2,7 +2,6 @@
 #include <ESP8266WiFi.h>
 #include <Wire.h>
 #include <uEEPROMLib.h>
-#include <uptime_formatter.h>
 #include <uptime.h>
 #include "config.h"
 #include "constants.h"
@@ -509,7 +508,7 @@ void updatestatus(){
         html_status.concat("mins</div></td></tr>");
       }else{
         html_status.concat("Automatic</td></tr>");
-        html_status.concat("<tr><th>Power: </th><td colspan='4'><div class='w3-container w3-center w3-green' style='width:");
+        html_status.concat("<tr><th>Pump Power: </th><td colspan='4'><div class='w3-container w3-center w3-green' style='width:");
         html_status.concat(ModeDesc[mode]);
         html_status.concat("%'>");
         html_status.concat(ModeDesc[mode]);
@@ -523,15 +522,15 @@ void updatestatus(){
       html_status.concat("Manual Off");
       break;
   }
-  html_status.concat("<tr><th>Uptime: </th><td colspan='2'>");
-  html_status.concat(uptime_formatter::getUptime());
-  html_status.concat("</td><td colspan='2'>>Log Length: ");
+  html_status.concat("<tr><th>Uptime: </th><td>");
+  html_status.concat(((float)(uptime::getMinutes()/60)+uptime::getHours())/24+uptime::getDays());
+  html_status.concat(" days</td><th>Log Length:</th><td colspan='2'>");
   html_status.concat((float)((Tier_1_Used + Tier_2_Used + Tier_3_Used + Tier_1_Savings + Tier_2_Savings + Tier_3_Savings)/(float)1440));
-  html_status.concat(" days</td></tr><tr><th>Prg Line: </th><td colspan='2'>");
+  html_status.concat(" days</td></tr><tr><th>Prg Line: </th><td>");
   html_status.concat(line);
-  html_status.concat("</td><td colspan='2'>Tier ");
+  html_status.concat("</td><th>Current Tier:</th><td colspan='2'>Tier ");
   html_status.concat(Tier_Mode+1);
-  html_status.concat(": $");
+  html_status.concat(" - $");
   switch(Tier_Mode){
     case 0:
       html_status.concat(Tier_1_Rate);
