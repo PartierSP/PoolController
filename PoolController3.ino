@@ -2,7 +2,6 @@
 #include <ESP8266WiFi.h>
 #include <Wire.h>
 #include <uEEPROMLib.h>
-#include <uptime.h>
 #include "config.h"
 #include "constants.h"
 #include "html.h"
@@ -38,9 +37,11 @@ float Tier_3_Rate;
 
 int Wattage;
 
+uint32_t Starttime;
 
 WiFiServer server(80);
 DS3231 Clock;
+RTClib myRTC;
 bool century = false;
 int int_8[4];
 bool h12Flag;
@@ -73,6 +74,9 @@ void setup() {
   Wire.begin();
 
   delay(500);
+
+  DateTime now = myRTC.now();
+  Starttime=now.unixtime();
 
   for(int i=0;i<8;i++){
     for(int x=0;x<3;x++){
@@ -480,6 +484,8 @@ void updatestatus(){
   float Used;
   
   getdatetime();
+  DateTime now = myRTC.now();
+
   i=digitalRead(Pool_Pin);
   rssi = WiFi.RSSI();
   sgnl=map(rssi, MIN_VAL, MAX_VAL, 0, 100); 
@@ -523,7 +529,7 @@ void updatestatus(){
       break;
   }
   html_status.concat("<tr><th>Uptime: </th><td>");
-  html_status.concat(((float)(uptime::getMinutes()/60)+uptime::getHours())/24+uptime::getDays());
+  html_status.concat((float)(now.unixtime() - Starttime) / 86400L);
   html_status.concat(" days</td><th>Log Length:</th><td colspan='2'>");
   html_status.concat((float)((Tier_1_Used + Tier_2_Used + Tier_3_Used + Tier_1_Savings + Tier_2_Savings + Tier_3_Savings)/(float)1440));
   html_status.concat(" days</td></tr><tr><th>Prg Line: </th><td>");
