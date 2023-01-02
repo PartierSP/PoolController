@@ -510,9 +510,11 @@ void updatestatus(){
   rssi = WiFi.RSSI();
   sgnl=map(rssi, MIN_VAL, MAX_VAL, 0, 100); 
 
-  html_status="<div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'><table class='w3-table w3-bordered'><tr><th style='width:25%'>Time:</th><td colspan='4'>";
+  html_status="<div class='w3-panel w3-card-4 w3-white w3-round-large w4-padding w3-center'><table class='w3-table w3-bordered'><tr><th style='width:25%'>Time:</th><td>";
   html_status.concat(curdatetime);
-  html_status.concat("</td></tr><tr><th>Pump:</th><td colspan='4' class='w3-text-");
+  html_status.concat("</td><th>Temperature:</th><td>");
+  html_status.concat(Clock.getTemperature());
+  html_status.concat("<sup>o</sup>C</td></tr><tr><th>Pump:</th><td colspan='4' class='w3-text-");
   if(i==0){
     html_status.concat("green'><b>On");
   }else{
