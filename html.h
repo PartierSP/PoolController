@@ -20,11 +20,15 @@ String html_2 = R"====(
     <h3>Functions</h3>
     <div class='w3-panel w3-card-4 w3-white w3-round-large w3-center'>
       <div class='w3-cell-row'> 
-        <div class='w3-container w3-cell w3-mobile w3-padding'>
+        <div class='w3-container w3-cell-middle w3-cell w3-mobile w3-padding'>
           <form method='get'><input type='hidden' value='1' name='BUMP'><input type='hidden' value='0' name='na'><input type='submit' value=' Bump ' class='w3-button w3-blue w3-round-large'></form>
         </div>
-        <div class='w3-container w3-cell w3-mobile w3-padding'>
+        <div class='w3-container w3-cell-middle w3-cell w3-mobile w3-padding'>
           <form method='get' onsubmit='synctime()'><div id='time'></div><input type='hidden' value='0' name='na'><input type='submit' value='Sync Time' class='w3-button w3-blue w3-round-large'></form>
+        </div>
+        <div class='w3-container w3-cell-middle w3-cell w3-mobile w3-padding'>
+          <input type='checkbox' id='reset' class='w3-check' onclick='reset_click()'><lable class='w3-text-grey'>Enable reset</label><br>
+          <form method='get'><input type='hidden' value='1' name='RESET'><input type='hidden' value='0' name='na'><input type='submit' value='Reset Totals' class='w3-button w3-blue w3-round-large' id='resetbt' disabled></form>
         </div>
       </div>
       <script>
@@ -46,6 +50,14 @@ String html_2 = R"====(
             +cHour+'><input type=hidden name=SETMIN value='
             +cMins+'><input type=hidden name=SETSEC value='
             +cSec+'>';
+        }
+
+        function reset_click(){
+          if(document.getElementById('reset').checked==false){
+            document.getElementById('resetbt').disabled=true;
+          }else{
+            document.getElementById('resetbt').disabled=false;
+          }
         }
       </script>
     </div>

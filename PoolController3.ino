@@ -221,6 +221,26 @@ void loop() {
             Serial.println(i);
             digitalWrite(Pool_Pin,i);
           }
+        } else if(strcmp("RESET",desc)==0){
+          Serial.println("Resetting accumulated values.");
+          Tier_1_Savings=0;
+          Tier_2_Savings=0;
+          Tier_3_Savings=0;
+          Tier_1_Used=0;
+          Tier_2_Used=0;
+          Tier_3_Used=0;
+          toint8(Tier_1_Savings);
+          saveint(61);
+          toint8(Tier_2_Savings);
+          saveint(65);
+          toint8(Tier_3_Savings);
+          saveint(69);
+          toint8(Tier_1_Used);
+          saveint(73);
+          toint8(Tier_2_Used);
+          saveint(77);
+          toint8(Tier_3_Used);
+          saveint(81);
         } else if(strcmp("TIER1RATE",desc)==0){
           Serial.print("Tier Rate 1 is now settings to: ");
           Serial.println(value);
